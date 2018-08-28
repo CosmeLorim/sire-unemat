@@ -1,0 +1,318 @@
+
+<center><h1>Cadastro de Disciplinas</h1></center>
+<div class="container">
+    <div class="grid">
+        <div class="row cells2">
+            <div class="cell colspan5">
+                <center><h2>Inserção/atualização de disciplinas</h2></center>
+                <div class="panel success">
+                    <div class="heading">
+                        <span class="title">Disciplina</span>
+                    </div>
+
+                    <div class="row cell">
+                        <div class="cell2">
+                            <label class="block">Nome da disciplina:</label>
+                            <div class="input-control text">
+                                <input type="text"
+                                       id="descricao"
+                                       value="" 
+                                       name="descricao" 
+                                       placeholder="Nome da Disciplina" 
+                                       data-validate-func="required"
+                                       data-validate-hint="O campo nome não deve ser vazio!">
+                            </div>
+                        </div>
+                        <div class="cell">
+                            <label class="block">Sigla da disciplina:</label>
+                            <div class="input-control text">
+                                <input type="text"
+                                       id="sigla"
+                                       value="" 
+                                       name="sigla" 
+                                       placeholder="Sigla">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row cells2">
+                        <div class="cell">
+                            <label class="block">Carga horária:</label>
+                            <div class="input-control text">
+                                <input type="number"
+                                       id="cargahoraria"
+                                       value="" 
+                                       name="sigla" 
+                                       placeholder="Carga horária">
+                            </div>
+                        </div>
+                        <div class="cell colspan7">
+                            <label class="block">Estado:</label>
+                            <label class="input-control radio">
+                                <input type="radio"
+                                       id="ativo"
+                                       name="ativo"
+                                       value="true" 
+                                       checked>
+                                <span class="check"></span>
+                                <span class="caption">Ativo</span>
+                            </label>
+                            <label class="input-control radio">
+                                <input type="radio"
+                                       id="inativo"
+                                       name="ativo"
+                                       value="false">
+                                <span class="check"></span>
+                                <span class="caption">Inativo</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row cells1">
+                        <div class="cell colspan12">
+                            <div class="cell">
+                                <label class="block">Semestre:</label>
+                                <div class="input-control select">
+                                    <select id="semestre">
+                                        <option value="1">1º Semestre</option>
+                                        <option value="2">2º Semestre</option>
+                                        <option value="3">3º Semestre</option>
+                                        <option value="4">4º Semestre</option>
+                                        <option value="5">5º Semestre</option>
+                                        <option value="6">6º Semestre</option>
+                                        <option value="7">7º Semestre</option>
+                                        <option value="8">8º Semestre</option>
+                                        <option value="9">9º Semestre</option>
+                                        <option value="10">10º Semestre</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel success">
+                    <div class="heading">
+                        <span class="title">Curso</span>
+                    </div>
+                    <div class="cell">
+                        <label class="block">Curso da disciplina:</label>
+                        <div class="input-control select">
+                            <select id="curso">
+                                <% for(var i = 0; i < dados.cursos.length; i ++){ %>
+                                <option value="<%= dados.cursos[i].id %>"><%= dados.cursos[i].descricao %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <button id="inserirDisciplina" class="button primary">Inserir</button>
+                <button id="atualizarDisciplina" class="button info" style="float: right;">Atualizar</button>
+            </div>
+            <div class="cell colspan7">
+                <center><h2>Lista de disciplinas</h2></center>
+                <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                    <input id="txconsulta" type="text">
+                    <span class="label">Localizar</span>
+                    <span class="informer">Digite o termo da busca</span>
+                    <span class="placeholder">Digite o termo da busca</span>
+                    <button id="btnConsulta" class="button"><span class="mif-search"></span></button>
+                </div>
+                <table id="gridDisciplinas">
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#inserirDisciplina').on('click', function ()
+    {
+        var disciplinaNova = new Disciplina();
+        disciplinaNova = pegarDadosForumularioDisciplinas();
+
+        if (disciplinaNova === false)
+            return;
+
+
+        var admin = new Admin();
+        var titulo = "Cadastro de disciplinas";
+        var conteudo = "Deseja cadastrar a disciplina \'"
+                + disciplinaNova.descricao + "\' ?";
+
+        var callback = function ()
+        {
+            $.post('cadastrar-disciplina',
+                    {
+                        descricao: disciplinaNova.descricao,
+                        sigla: disciplinaNova.sigla,
+                        curso: disciplinaNova.curso,
+                        ativo: disciplinaNova.ativo,
+                        carga_horaria: disciplinaNova.carga_horaria,
+                        semestre: disciplinaNova.semestre
+
+                    },
+                    function (data, status)
+                    {
+                        $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                        if (data.status === 'success')
+                        {
+                            $("#gridDisciplinas").bootstrapTable('refresh', {
+                                url: "/disciplinas"
+                            });
+                            limpaTelaDisciplinas();
+                        }
+                    }
+            );
+        };
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#atualizarDisciplina').on('click', function ()
+    {
+        var disciplinaNova = new Disciplina();
+        disciplinaNova = pegarDadosForumularioDisciplinas();
+
+        if (disciplinaNova === false)
+            return;
+
+        if (disciplinaAntiga.id === null)
+        {
+            $.Notify({
+                caption: 'Erro',
+                content: 'Você não selecionou uma disciplina para atualizar!',
+                timeout: 10000,
+                type: 'alert'
+            });
+            return;
+        }
+
+        var admin = new Admin();
+        var titulo = "Atualização de disciplinas";
+        var conteudo = "Deseja atualizar a disciplina \'"
+                + disciplinaNova.descricao + "\' ?";
+
+        var callback = function ()
+        {
+            $.post('atualizar-disciplina',
+                    {
+                        id: disciplinaAntiga.id,
+                        descricao: disciplinaNova.descricao,
+                        sigla: disciplinaNova.sigla,
+                        curso: disciplinaNova.curso,
+                        ativo: disciplinaNova.ativo,
+                        carga_horaria: disciplinaNova.carga_horaria,
+                        semestre: disciplinaNova.semestre
+
+                    },
+                    function (data, status)
+                    {
+                        $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                        if (data.status === 'success')
+                        {
+                            $("#gridDisciplinas").bootstrapTable('refresh', {
+                                url: "/disciplinas"
+                            });
+                            limpaTelaDisciplinas();
+                        }
+                    }
+            );
+        };
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    var disciplinaAntiga = new Disciplina();
+
+    $("#gridDisciplinas").bootstrapTable({
+        url: "/disciplinas",
+        pageSize: 10,
+        pagination: true,
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            {field: 'disciplinadescricao', title: 'Disciplinas', width: '15%'},
+            {field: 'cursodescricao', title: 'Curso', width: '45%'},
+            {field: 'disciplinasigla', title: 'Sigla', width: '10%'},
+            {field: 'disciplinacargahoraria', title: 'Carga Horária', width: '20%'},
+            {field: 'disciplinaativo', title: 'Ativo', width: '10%'}
+        ],
+        onClickRow: function (row) {
+            $('#descricao').val(row.disciplinadescricao);
+            $('#sigla').val(row.disciplinasigla);
+            $('#cargahoraria').val(row.disciplinacargahoraria);
+
+            $('#ativo').prop("checked", row.disciplinaativo);
+            $('#ativo').val(row.disciplinaativo);
+            $('#inativo').prop("checked", !row.disciplinaativo);
+
+            $('#semestre').val(row.disciplinasemestre);
+            $('#curso').val(row.cursoid);
+
+            disciplinaAntiga.id = row.disciplinaid;
+            disciplinaAntiga.descricao = row.disciplinadescricao;
+            disciplinaAntiga.sigla = row.disciplinasigla;
+            disciplinaAntiga.curso = row.disciplinacurso;
+            disciplinaAntiga.ativo = row.disciplinaativo;
+            disciplinaAntiga.carga_horaria = row.disciplinacargahoraria;
+            disciplinaAntiga.semestre = row.disciplinasemestre;
+        }
+    });
+
+    function pegarDadosForumularioDisciplinas()
+    {
+        var disciplinaNova = new Disciplina();
+
+        if (!disciplinaNova.validaDescricao($('#descricao').val()))
+            return false;
+        disciplinaNova.descricao = $('#descricao').val();
+
+        if (!disciplinaNova.validaSigla($('#sigla').val()))
+            return false;
+        disciplinaNova.sigla = $('#sigla').val();
+
+        if (!disciplinaNova.validaCargaHoraria($('#cargahoraria').val()))
+            return false;
+        disciplinaNova.carga_horaria = $('#cargahoraria').val();
+
+        disciplinaNova.ativo = $('#ativo').prop('checked');
+        disciplinaNova.semestre = $('#semestre option:selected').val();
+        disciplinaNova.curso = $('#curso option:selected').val();
+        return disciplinaNova;
+    }
+
+    $('#btnConsulta').on('click', function ()
+    {
+        $("#gridDisciplinas").bootstrapTable('refresh', {
+            url: "/disciplinas?txconsulta=" + $('#txconsulta').val()
+        });
+    });
+
+    function limpaTelaDisciplinas()
+    {
+        $('#id').val('');
+        $('#descricao').val('');
+        $('#sigla').val('');
+
+        $('#ativo').prop("checked", true);
+        $('#ativo').val(true);
+        $('#inativo').prop("checked", false);
+
+        $('#cargahoraria').val('');
+        $('#semestre').val(1);
+
+        $('#curso').val('');
+    }
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+                .toggleClass("selected")
+                .siblings(".selected")
+                .removeClass("selected");
+    });
+</script>

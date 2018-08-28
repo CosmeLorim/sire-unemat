@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/metro.css" rel="stylesheet">
+        <link href="css/metro-colors.css" rel="stylesheet">
+        <link href="css/metro-responsive.css" rel="stylesheet">
+        <link href="css/metro-rtl.css" rel="stylesheet">
+        <link href="css/metro-schemes.css" rel="stylesheet">
+        <link href="css/metro-icons.css" rel="stylesheet">
+        <link href="css/bootstrap-table.css" rel="stylesheet">
+        <link href="css/estilo.css" rel="stylesheet">
+        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/daterangepicker.css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+        <meta name="description" content="Sistema de Reservas de Equipamentos, salas e laboratórios para a UNEMAT-BBG">
+        <meta name="author" content="Cosme da Silva Lorim (estagiário do SPD da UNEMAT de Barra do Bugres)">
+        <title>Reservas UNEMAT-BBG</title>
+    </head>
+    <body>
+        <div class="app-bar">
+            <a class="app-bar-element branding">Reservas UNEMAT</a>
+            <div class="place-right">
+                <input type="text" name="usr" id="usr" placeholder="Usuário" value="" class="input-control text">
+                <input type="password" name="passwd" id="passwd" placeholder="Senha" value="" class="input-control password">
+                <button id="entrar" class="button info block-shadow-info text-shadow">Entrar</button>
+            </div>
+        </div>
+        <p style="padding: 0.3em;"></p>
+        <div class="container">
+            <div class="grid row">
+                <div class="row cells12">
+                    <div class="cell colspan3">
+                        <div data-role="calendar" id="reservadata" data-day-click="atualizarReservas" data-locale="pt"></div>
+                        <p>Clique para consultar uma data</p>
+                        <p style="font-weight: bold">Legenda:</p>
+                        <p>Livre <span class="mif-checkmark fg-blue"></span></p>
+                        <p>Reservado <span class="mif-cross fg-red"></span></p>
+                    </div>
+                    <div class="cell colspan9">
+                        <table id="tabelareservas">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" data-field="descricao">Objeto</th>
+                                    <th colspan="4">Matutino</th>
+                                    <th rowspan="2" data-field="almoco" data-formatter="formatadorCelula">Almoço</th>
+                                    <th colspan="4">Vespertino</th>
+                                    <th rowspan="2" data-field="janta" data-formatter="formatadorCelula">Janta</th>
+                                    <th colspan="4" data-formatter="formatadorCelula">Noturno</th>
+                                </tr>
+                                <tr>
+                                    <th data-field="mat_aula_1" data-formatter="formatadorCelula">1</th>
+                                    <th data-field="mat_aula_2" data-formatter="formatadorCelula">2</th>
+                                    <th data-field="mat_aula_3" data-formatter="formatadorCelula">3</th>
+                                    <th data-field="mat_aula_4" data-formatter="formatadorCelula">4</th>
+
+                                    <th data-field="vesp_aula_1" data-formatter="formatadorCelula">1</th>
+                                    <th data-field="vesp_aula_2" data-formatter="formatadorCelula">2</th>
+                                    <th data-field="vesp_aula_3" data-formatter="formatadorCelula">3</th>
+                                    <th data-field="vesp_aula_4" data-formatter="formatadorCelula">4</th>
+
+                                    <th data-field="not_aula_1" data-formatter="formatadorCelula">1</th>
+                                    <th data-field="not_aula_2" data-formatter="formatadorCelula">2</th>
+                                    <th data-field="not_aula_3" data-formatter="formatadorCelula">3</th>
+                                    <th data-field="not_aula_4" data-formatter="formatadorCelula">4</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="copyright" style="vertical-align: bottom; text-align: center;">
+            &copy; Desenvolvido por UNEMAT - Unemat-BBG Campus Universitário Renê Barbour<br>
+            Endereço: R. A, s/n - COHAB São Raimundo, Barra do Bugres - MT, 78390-000
+        </p>
+    </body>
+
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/bootstrap-table.min.js"></script>
+    <script src="js/metro.js"></script>
+    <script src="js/bootstrap-table.min.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/daterangepicker.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/md5.min.js" type="text/javascript"></script>
+    
+    <script>
+        $('#entrar').click(function ()
+        {
+            var usr = $('#usr').val();
+            var passwd = $('#passwd').val();
+
+            if (usr.length === 0)
+            {
+                $.Notify({
+                    caption: 'Erro no login',
+                    content: 'Você não digitou o usuário.',
+                    timeout: 5000,
+                    type: 'alert'
+                });
+                return;
+            }
+
+            if (passwd.length === 0)
+            {
+                $.Notify({
+                    caption: 'Erro na senha',
+                    content: 'Você não digitou a senha.',
+                    timeout: 5000,
+                    type: 'alert'
+                });
+                return;
+            }
+
+            if (passwd.length < 6)
+            {
+                $.Notify({
+                    caption: 'Erro na senha',
+                    content: 'Senha deve possuir ao menos 6 digitos.',
+                    timeout: 10000,
+                    type: 'alert'
+                });
+                return;
+            }
+            
+            $.post('autenticar',
+                    {
+                        usr: usr,
+                        passwd: md5(passwd)
+                    }
+            , function (data, status)
+            {
+                $.Notify({
+                    caption: data.title,
+                    content: data.msg,
+                    timeout: 10000,
+                    type: data.status
+                });
+                if (data.status === 'success')
+                    window.location.href = '/admin';
+            });
+        });
+
+        $('#tabelareservas').bootstrapTable({
+            url: "/reservas",
+            pageSize: 20,
+            pagination: false,
+            pagelist: [10, 100, 250],
+            sidePagination: 'server',
+            onClickRow: function (row)
+            {
+                $.post('reservas/usuarios',
+                        {
+                            data: row.data,
+                            objeto: row.objeto
+                        },
+                        function (data)
+                        {
+                            var admin = new Admin();
+                            var titulo = 'Reservas - ' + row.descricao;
+
+                            var conteudo = '';
+                            $.each(data.reservas, function (indice, aula)
+                            {
+                                conteudo += '<p>' + aula.item + ': ' + aula.professor + '</p>';
+                            });
+
+                            var color = 'success';
+
+                            admin.dialogOk({titulo, conteudo, color});
+
+                            if (data.status === 'alert')
+                            {
+                                $.Notify({
+                                    caption: data.title,
+                                    content: data.msg,
+                                    timeout: 10000,
+                                    type: data.status
+                                });
+                            }
+                        }
+                );
+            }
+        });
+
+        function atualizarReservas(data)
+        {
+            var dia = data.slice(8, 10);
+            var mes = data.slice(5, 7);
+            var ano = data.slice(0, 4);
+            $('#tabelareservas').bootstrapTable('refresh', {
+                url: '/reservas?dia=' + dia + '&mes=' + mes + '&ano=' + ano
+            });
+        }
+
+        function formatadorCelula(val)
+        {
+            if (val)
+            {
+                return '<span class="mif-cross fg-red"></span>';
+            }
+            return '<span class="mif-checkmark fg-blue"></span>';
+        }
+
+        function utxToData(val) {
+            var d = moment.unix(val);
+            return moment(d).format('DD/MM/YYYY');
+        }
+    </script>
+</html>

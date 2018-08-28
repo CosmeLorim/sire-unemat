@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/metro.css" rel="stylesheet">
+    <link href="css/metro-colors.css" rel="stylesheet">
+    <link href="css/metro-responsive.css" rel="stylesheet">
+    <link href="css/metro-rtl.css" rel="stylesheet">
+    <link href="css/metro-schemes.css" rel="stylesheet">
+    <link href="css/estilo.css" rel="stylesheet">
+    <meta name="description" content="Sistema de Reservas de Equipamentos, salas e laboratórios para a UNEMAT-BBG">
+    <meta name="author" content="Cosme da Silva Lorim (estagiário do SPD da UNEMAT de Barra do Bugres)">
+    <title>Reservas UNEMAT-BBG</title>
+  </head>
+  <body>
+    <nav class="app-bar">
+      <a class="app-bar-element" href="/">Reservas UNEMAT</a>
+    </nav>
+    <center><h1>Cadastro de Salas e Laboratórios</h1></center>
+      <div class="container flex-grid">
+        <form action="/cadastrar-sala-ou-laboratorio" method="post">
+          <div class="row flex-just-center">
+            <div class="cell size1"></div>
+            <div class="cell size2">
+              <div class="input-controll text">
+                <label for="identificacao" class="col-form-label">Identificação</label>
+                <input type="text" id="identificacao" class="form-control" name="identificacao" placeholder="Identificação">
+              </div>
+            </div>
+
+            <div class="cell size2">
+              <div class="input-controll text">
+                <label for="localizacao" class="col-form-label">Localização</label>
+                <input type="text" value="" class="form-controll" id="localizacao" name="localizacao" placeholder="Localização">
+              </div>
+            </div>
+
+            <div class="cell size4">
+              <div class="input-controll textarea">
+                <label for="caracteristicas" class="col-form-label">Caracteristicas</label>
+                <textarea type="text" value="" class="form-controll" id="caracteristicas" name="caracteristicas" placeholder="Caracteristicas"></textarea>
+              </div>
+            </div>
+          </div>
+
+        <p style="padding:10px"></p>
+        <div class="row flex-just-center">
+          <div class="cell">
+            <center><button type="submit" class="button success block-shadow-info text-shadow">Cadastrar</button></center>
+          </div>
+    		</div>
+
+      </form>
+    </div>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/metro.js"></script>
+  </body>
+</html>

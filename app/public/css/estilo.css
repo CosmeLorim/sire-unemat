@@ -1,0 +1,105 @@
+.app-bar {
+    background-color: #26A65B;
+}
+
+.sidebar, .cell-sidebar {
+    background-color: #128023;
+}
+
+h1 {
+    padding: .3em;
+}
+
+h5 {
+    text-align: center;
+    font-weight: bold;
+}
+
+#tabelamanutencao .th-inner, td, th {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+html, body {
+    height: 100%;
+}
+body {
+    background-color: rgba(235, 249, 221, 0.53);
+}
+.page-content {
+    padding-top: 3.125rem;
+    min-height: 100%;
+    height: 100%;
+}
+.table .input-control.checkbox {
+    line-height: 1;
+    min-height: 0;
+    height: auto;
+}
+
+.text{
+    width: 100%;
+}
+
+.daterangepicker.dropdown-menu {
+    display: none;
+}
+
+@media screen and (max-width: 800px){
+    #cell-sidebar {
+        flex-basis: 52px;
+    }
+    /*#cell-content {*/
+    flex-basis: calc(100% - 52px);
+}
+
+#data{
+    width: 40%;
+}
+
+table { width: 50% }
+tbody tr:hover.selected td,
+tbody tr:hover td {
+    background-color: #60a917 !important;
+    cursor: pointer;
+}
+
+tbody tr.selected td {
+    background-color: #60a917 !important    ;
+}
+
+.pagination-detail{
+    display: none;
+}
+
+ul.pagination{
+    display: flex;
+}
+
+li.page-pre{
+    list-style-type: none !important;
+}
+
+li.page-first-separator{
+    list-style-type: none !important;
+}
+
+li.page-first{
+    list-style-type: none !important;
+}
+
+li.page-number{
+    list-style-type: none !important;
+}
+
+li.page-next{
+    list-style-type: none !important;
+}
+
+li.page-last-separator{
+    list-style-type: none !important;
+}
+
+li.page-last{
+    list-style-type: none !important;
+}

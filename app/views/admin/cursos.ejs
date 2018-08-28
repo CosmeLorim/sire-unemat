@@ -1,0 +1,228 @@
+<center><h1>Administração de Cursos</h1></center>
+<div class="container">
+    <div class="grid">
+        <div class="flex-grid">
+            <div class="row cell-auto-size">
+                <div class="cell">
+                    <center><h2>Inserção/atualização de cursos</h2></center>
+                    <div class="panel success">
+                        <div class="heading">
+                            <span class="title">Curso</span>
+                        </div>
+                        <div class="row">
+                            <div class="cell colspan12">
+                                <label class="block">Nome do curso:</label>
+                                <div class="input-control text" style="width: 100%;">
+                                    <input type="text"
+                                           id="descricao"
+                                           value="" 
+                                           name="descricao" 
+                                           placeholder="Nome do Curso" 
+                                           data-validate-func="required"
+                                           data-validate-hint="O campo nome não deve ser vazio!">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cell colspan6">
+                                <label class="block">Sigla do curso:</label>
+                                <div class="input-control text" style="width: 100%;">
+                                    <input type="text"
+                                           id="sigla"
+                                           value="" 
+                                           name="sigla" 
+                                           placeholder="Sigla do Curso" 
+                                           data-validate-func="required"
+                                           data-validate-hint="O campo sigla não deve ser vazio!">
+                                </div>
+                            </div>
+                            <div class="cell colspan6">
+                                <label class="block">Estado:</label>
+                                <label class="input-control radio">
+                                    <input type="radio"
+                                           id="ativo"
+                                           name="ativo"
+                                           value="true" 
+                                           checked>
+                                    <span class="check"></span>
+                                    <span class="caption">Ativo</span>
+                                </label>
+                                <label class="input-control radio">
+                                    <input type="radio"
+                                           id="inativo"
+                                           name="ativo"
+                                           value="false">
+                                    <span class="check"></span>
+                                    <span class="caption">Inativo</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <button id="inserirCurso" class="button primary">Inserir</button>
+                    <button id="atualizarCurso" class="button info" style="float: right;">Atualizar</button>
+
+                </div>
+                <div class="cell">
+                    <center><h2>Lista de cursos</h2></center>
+                    <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                        <input id="txconsulta" type="text">
+                        <span class="label">Localizar</span>
+                        <span class="informer">Digite o termo da busca</span>
+                        <span class="placeholder">Digite o termo da busca</span>
+                        <button id="btnConsulta" class="button"><span class="mif-search"></span></button>
+                    </div>
+                    <table id="gridCursos">
+
+                    </table>
+                </div>
+            </div>
+            <p style="padding:10px"></p>
+        </div>
+    </div>
+</div>
+<script>
+    $('#inserirCurso').on('click', function () {
+        var cursoNovo = new Curso();
+
+        if (!cursoNovo.validaDescricao($('#descricao').val()))
+            return;
+        cursoNovo.descricao = $('#descricao').val();
+
+        if (!cursoNovo.validaSigla($('#sigla').val()))
+            return;
+        cursoNovo.sigla = $('#sigla').val();
+
+        cursoNovo.ativo = $('#ativo').prop('checked');
+
+        var admin = new Admin();
+        var titulo = "Cadastro de curso";
+        var conteudo = "Deseja cadastrar o curso \'"
+                + cursoNovo.descricao + "\' e "
+                + "com ativo \'" + cursoNovo.ativo + '\'?';
+        
+        var callback = function ()
+        {
+            $.post('cadastrar-curso',
+                    {
+                        descricao: cursoNovo.descricao,
+                        sigla: cursoNovo.sigla,
+                        ativo: cursoNovo.ativo
+                    },
+                    function (data, status)
+                    {
+                        $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                        if (data.status === 'success')
+                            $("#gridCursos").bootstrapTable('refresh', {
+                                url: "/cursos"
+                            });
+                    });
+        };
+
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#atualizarCurso').on('click', function () {
+        var cursoNovo = new Curso();
+
+        if (!cursoNovo.validaDescricao($('#descricao').val()))
+            return;
+        cursoNovo.descricao = $('#descricao').val();
+
+        if (!cursoNovo.validaSigla($('#sigla').val()))
+            return;
+        cursoNovo.sigla = $('#sigla').val();
+
+        cursoNovo.id = $('#id').val();
+
+        if (cursoNovo.id === "")
+        {
+            $.Notify({
+                caption: 'Erro',
+                content: 'Você não selecionou um curso para atualizar',
+                timeout: 10000,
+                type: 'alert'
+            });
+            return;
+        }
+
+        cursoNovo.ativo = $('#ativo').prop('checked');
+
+        var admin = new Admin();
+
+        var titulo = "Atualização de dados";
+        var conteudo = "Deseja atualizar os seguintes dados \'"
+                + cursoAntigo.descricao + "\' para \'" + cursoNovo.descricao
+                + "\' e ativo de \'" + cursoAntigo.ativo + "\' para \'" + cursoNovo.ativo + "\'?";
+        var callback = function ()
+        {
+            $.post('atualizar-curso',
+                    {
+                        id: cursoAntigo.id,
+                        sigla: cursoNovo.sigla,
+                        descricao: cursoNovo.descricao,
+                        ativo: cursoNovo.ativo
+                    }
+            , function (data, status)
+            {
+                $.Notify({
+                    caption: data.title,
+                    content: data.msg,
+                    timeout: 10000,
+                    type: data.status
+                });
+                if (data.status === 'success')
+                    $("#gridCursos").bootstrapTable('refresh', {
+                        url: "/cursos"
+                    });
+            });
+        };
+
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#btnConsulta').on('click', function ()
+    {
+        $("#gridCursos").bootstrapTable('refresh', {
+            url: "/cursos?txconsulta=" + $('#txconsulta').val()
+        });
+    });
+
+    var cursoAntigo = new Curso();
+
+    $("#gridCursos").bootstrapTable({
+        url: "/cursos",
+        pageSize: 10,
+        pagination: true,
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            {field: 'descricao', title: 'Cursos', width: '75%'},
+            {field: 'sigla', title: 'Sigla', width: '15%'},
+            {field: 'ativo', title: 'ativo', width: '10%'}
+        ],
+        onClickRow: function (row) {
+            $('#id').val(row.id);
+            $('#descricao').val(row.descricao);
+            $('#sigla').val(row.sigla);
+
+            cursoAntigo.id = row.id;
+            cursoAntigo.descricao = row.descricao;
+            cursoAntigo.ativo = row.ativo;
+
+            $('#ativo').prop("checked", row.ativo);
+            $('#ativo').val(row.ativo);
+            $('#inativo').prop("checked", !row.ativo);
+        }
+    });
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+                .toggleClass("selected")
+                .siblings(".selected")
+                .removeClass("selected");
+    });
+</script>

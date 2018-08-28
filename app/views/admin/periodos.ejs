@@ -1,0 +1,282 @@
+<center><h1>Administração de Periodos</h1></center>
+<div class="container">
+    <div class="grid">
+        <div class="flex-grid">
+            <div class="row cell-auto-size">
+                <div class="cell">
+                    <center><h2>Inserção/atualização de períodos</h2></center>
+                    <div class="panel success">
+                        <div class="heading">
+                            <span class="title">Período</span>
+                        </div>
+                        <div class="cells2">
+                            <div class="row">
+                                <div class="cell">
+                                    <label class="block">Nome do período:</label>
+                                    <div class="input-control text">
+                                        <input type="text"
+                                               id="nome"
+                                               value="" 
+                                               name="nome" 
+                                               placeholder="Ex: 2017/2" 
+                                               data-validate-func="required"
+                                               data-validate-hint="O campo nome não deve ser vazio!">
+                                    </div>
+                                </div>
+                                <div class="cell">
+                                    <label class="block">Estado:</label>
+                                    <label class="input-control radio">
+                                        <input type="radio"
+                                               id="ativo"
+                                               name="ativo"
+                                               value="true" 
+                                               checked>
+                                        <span class="check"></span>
+                                        <span class="caption">Ativo</span>
+                                    </label>
+                                    <label class="input-control radio">
+                                        <input type="radio"
+                                               id="inativo"
+                                               name="ativo"
+                                               value="false">
+                                        <span class="check"></span>
+                                        <span class="caption">Inativo</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="cell">
+                                    <label class="block" for="data">Inicio do período:</label>
+                                    <input type="text" id="data" value=""/>
+                                </div>
+                            </div>
+                        </div>                        
+                    </div>
+                    <hr>
+                    <button id="inserirPeriodo" class="button primary">Inserir</button>
+                    <button id="atualizarPeriodo" class="button info" style="float: right;">Atualizar</button>
+
+                </div>
+                <div class="cell">
+                    <center><h2>Lista de períodos</h2></center>
+                    <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                        <input id="txconsulta" type="text">
+                        <span class="label">Localizar</span>
+                        <span class="informer">Digite o período para a busca</span>
+                        <span class="placeholder">Digite o período para a busca</span>
+                        <button id="btnConsulta" class="button"><span class="mif-search"></span></button>
+                    </div>
+                    <table id="gridPeriodos">
+
+                    </table>
+                </div>
+            </div>
+            <p style="padding:10px"></p>
+        </div>
+    </div>
+</div>
+<script>
+    $('#data').daterangepicker({
+        "timePicker": false,
+        "opens": "rigth",
+        "drops": "down",
+        "locale": {
+            format: 'DD/MM/YYYY',
+            "separator": " | até | ",
+            "applyLabel": "Aplicar",
+            "cancelLabel": "Cancelar",
+            "fromLabel": "de",
+            "toLabel": "para",
+            "customRangeLabel": "Personalizado",
+            "daysOfWeek": [
+                "Dom",
+                "Seg",
+                "Ter",
+                "Qua",
+                "Qui",
+                "Sex",
+                "Sab"
+            ],
+            "monthNames": [
+                "Janeiro",
+                "Fevereiro",
+                "Março",
+                "Abril",
+                "Maio",
+                "junho",
+                "Julho",
+                "Agosto",
+                "Setembro",
+                "Outubro",
+                "Novembro",
+                "Dezembro"
+            ],
+            "firstDay": 1
+        },
+        "startDate": moment(),
+        "endDate": moment().add(1, 'M')
+    });
+
+    $('#inserirPeriodo').on('click', function () {
+        var periodoNovo = new Periodo();
+
+        if (!periodoNovo.validaNome($('#nome').val()))
+            return;
+        periodoNovo.nome = $('#nome').val();
+
+        var data_inicio = parseInt(moment($("#data").data('daterangepicker').startDate).format('X'));
+        var data_fim = parseInt(moment($("#data").data('daterangepicker').endDate).format('X'));
+
+        if (!periodoNovo.validaDatas(data_inicio, data_fim))
+            return;
+        periodoNovo.data_inicio = data_inicio;
+        periodoNovo.data_fim = data_fim;
+
+        periodoNovo.ativo = $('#ativo').prop('checked');
+
+        var admin = new Admin();
+        var titulo = "Cadastro de período";
+        var conteudo = "Deseja cadastrar o período \'"
+                + periodoNovo.nome + "\' e "
+                + "com ativo \'" + periodoNovo.ativo + '\'?';
+        var callback = function ()
+        {
+            $.post('cadastrar-periodo',
+                    {
+                        nome: periodoNovo.nome,
+                        ativo: periodoNovo.ativo,
+                        data_inicio: periodoNovo.data_inicio,
+                        data_fim: periodoNovo.data_fim
+                    }, function (data, status)
+            {
+                $.Notify({
+                    caption: data.title,
+                    content: data.msg,
+                    timeout: 10000,
+                    type: data.status
+                });
+                if (data.status === 'success')
+                {
+                    $("#gridPeriodos").bootstrapTable('refresh', {
+                        url: "/periodos"
+                    });
+                    limpaTelaPeriodos();
+                }
+            });
+        };
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#atualizarPeriodo').on('click', function () {
+        var periodoNovo = new Periodo();
+
+        if (!periodoNovo.validaNome($('#nome').val()))
+            return;
+        periodoNovo.nome = $('#nome').val();
+
+        var data_inicio = parseInt(moment($("#data").data('daterangepicker').startDate).format('X'));
+        var data_fim = parseInt(moment($("#data").data('daterangepicker').endDate).format('X'));
+
+        if (!periodoNovo.validaDatas(data_inicio, data_fim))
+            return;
+        periodoNovo.data_inicio = data_inicio;
+        periodoNovo.data_fim = data_fim;
+
+        periodoNovo.ativo = $('#ativo').prop('checked');
+
+        var admin = new Admin();
+        var titulo = "Cadastro de período";
+        var conteudo = "Deseja cadastrar o período \'"
+                + periodoNovo.nome + "\' e "
+                + "com ativo \'" + periodoNovo.ativo + '\'?';
+
+        var callback = function ()
+        {
+            $.post('atualizar-periodo',
+                    {
+                        id: periodoAntigo.id,
+                        nome: periodoNovo.nome,
+                        ativo: periodoNovo.ativo,
+                        data_inicio: periodoNovo.data_inicio,
+                        data_fim: periodoNovo.data_fim
+                    },
+                    function (data, status)
+                    {
+                        $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                        if (data.status === 'success')
+                        {
+                            $("#gridPeriodos").bootstrapTable('refresh', {
+                                url: "/periodos"
+                            });
+                            limpaTelaPeriodos();
+                        }
+                    });
+        };
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#btnConsulta').on('click', function ()
+    {
+        $("#gridPeriodos").bootstrapTable('refresh', {
+            url: "/periodos?txconsulta=" + $('#txconsulta').val()
+        });
+    });
+
+    var periodoAntigo = new Periodo();
+    var admin = new Admin();
+    $("#gridPeriodos").bootstrapTable({
+        url: "/periodos",
+        pageSize: 10,
+        pagination: true,
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            {field: 'nome', title: 'Periodo', width: '50%'},
+            {field: 'data_inicio', title: 'Inicio', width: '20%', formatter: periodoAntigo.formatarData},
+            {field: 'data_fim', title: 'Fim', width: '20%', formatter: periodoAntigo.formatarData},
+            {field: 'ativo', title: 'Ativo', width: '10%'}
+        ],
+        onClickRow: function (row)
+        {
+            periodoAntigo.copiarDados(row);
+
+            $('#id').val(row.id);
+            $('#nome').val(row.nome);
+
+            $('#ativo').prop("checked", row.ativo);
+            $('#ativo').val(row.ativo);
+            $('#inativo').prop("checked", !row.ativo);
+
+            $("#data").data('daterangepicker').setStartDate(moment.unix(row.data_inicio));
+            $("#data").data('daterangepicker').setEndDate(moment.unix(row.data_fim));
+        }
+    });
+
+    function utxToData(val) {
+        var d = moment.unix(val);
+        return moment(d).format('DD/MM/YYYY');
+    }
+
+    function limpaTelaPeriodos()
+    {
+        $('#id').val('');
+        $('#nome').val('');
+
+        $('#ativo').prop("checked", true);
+        $('#ativo').val(true);
+        $('#inativo').prop("checked", false);
+
+        $("#data").data('daterangepicker').setStartDate(moment.unix(moment()));
+        $("#data").data('daterangepicker').setEndDate(moment.unix(moment().add(1, 'M')));
+    }
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+                .toggleClass("selected")
+                .siblings(".selected")
+                .removeClass("selected");
+    });
+</script>

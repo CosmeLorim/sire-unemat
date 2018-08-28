@@ -1,0 +1,393 @@
+<center><h2>Administração de Usuários</h2></center>
+<div class="container page-content">
+    <div class="grid">
+        <div class="row cells2">
+            <div class="cell colspan7">
+                <div class="panel success">
+                    <div class="heading">
+                        <span class="title">Login</span>
+                    </div>
+                    <div class="row cells2">
+                        <div class="cell colspan6" style="width: 100%">
+                            <label class="block">Nome:</label>
+                            <div class="input-control text"  style="width: 100%;">
+                                <input type="text"
+                                       id="nome"
+                                       value="" 
+                                       name="nome" 
+                                       placeholder="Nome" 
+                                       data-validate-func="required"
+                                       data-validate-hint="O campo nome não deve ser vazio!">
+                                <span class="input-state-error mif-warning"></span>
+                                <span class="input-state-success mif-checkmark"></span>
+                            </div>
+                        </div>
+
+                        <div class="cell colspan6">
+                            <label class="block">Usuário:</label>
+                            <div class="input-control text"  style="width: 90%;">
+                                <input type="text"
+                                       id="usr"
+                                       value="" 
+                                       name="usuario" 
+                                       placeholder="Usuário" 
+                                       data-validate-func="required"
+                                       data-validate-hint="O campo Usuário não deve ser vazio!">
+                                <span class="input-state-error mif-warning"></span>
+                                <span class="input-state-success mif-checkmark"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel success">
+                    <div class="heading">
+                        <span class="title">Senha</span>
+                    </div>
+                    <div class="content">
+                        <div class="row cells2">
+                            <div class="cell colspan6">
+                                <label class="block">Senha:</label>
+                                <div class="input-control password" data-role="input"  style="width: 100%;">
+                                    <input type="password"
+                                           id="passwd1" 
+                                           value="" 
+                                           name="senha" 
+                                           placeholder="Senha" 
+                                           data-validate-func="required"
+                                           data-validate-hint="O campo Senha não deve ser vazio!">
+                                    <button class="button helper-button reveal"><span class="mif-looks"></span></button>
+                                    <span class="input-state-error mif-warning"></span>
+                                    <span class="input-state-success mif-checkmark"></span>
+                                </div>
+                            </div>
+
+                            <div class="cell colspan6">
+                                <label class="block">Confirmação de senha:</label>
+                                <div class="input-control password" data-role="input"  style="width: 90%;">
+                                    <input type="password"
+                                           id="passwd2" 
+                                           value="" 
+                                           placeholder="Confirmação de senha" 
+                                           data-validate-func="required"
+                                           data-validate-hint="O campo de confirmação de Senha não deve ser vazio!">
+                                    <button class="button helper-button reveal"><span class="mif-looks"></span></button>
+                                    <span class="input-state-error mif-warning"></span>
+                                    <span class="input-state-success mif-checkmark"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel success">
+                    <div class="heading">
+                        <span class="title">Estado</span>
+                    </div>
+                    <div class="content">
+                        <label class="input-control radio">
+                            <input type="radio"
+                                   id="ativo"
+                                   name="ativo"
+                                   value="true" 
+                                   checked>
+                            <span class="check"></span>
+                            <span class="caption">Ativo</span>
+                        </label>
+                        <label class="input-control radio">
+                            <input type="radio"
+                                   id="inativo"
+                                   name="ativo"
+                                   value="false">
+                            <span class="check"></span>
+                            <span class="caption">Inativo</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="panel success">
+                    <div class="heading">
+                        <span class="title">Grupo de usuário</span>
+                    </div>
+                    <div class="content">
+                        <div class="row cells2">
+                            <div class="cell">
+                                <label class="block">Normal</label>
+                                <label class="input-control radio">
+                                    <input type="radio"
+                                           id="normal"
+                                           name="grupo" 
+                                           checked=""
+                                           value="normal">
+                                    <span class="check"></span>
+                                </label>
+                            </div>
+
+                            <div class="cell">
+                                <label class="block">Administrador</label>
+                                <label class="input-control radio">
+                                    <input type="radio"
+                                           id="admin"
+                                           name="grupo" 
+                                           value="admin">
+                                    <span class="check"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel success">
+                    <div class="heading">
+                        <span class="title">Categoria de objetos</span>
+                    </div>
+                    <div class="content">
+                        <% for(var i = 0; i < dados.tiposObjetos.length; i ++){ %>
+                        <label class="input-control checkbox">
+                            <input type="checkbox" id="tipoObjeto<%= dados.tiposObjetos[i].id %>">
+                            <span class="check"></span>
+                            <span class="caption"><%= dados.tiposObjetos[i].descricao %></span>
+                        </label>
+                        <% } %>
+                    </div>
+                    <input hidden="" id="tiposobjetos" value="<%= JSON.stringify(dados.tiposObjetos) %>">
+                </div>
+                <hr>
+                <button id="inserirUsuario" class="button primary">Inserir</button>
+                <button id="atualizarUsuario" class="button info" style="float: right;">Atualizar</button>
+            </div>
+
+            <div class="cell colspan5">
+                <center><h2>Lista de usuários</h2></center>
+                <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                    <input id="txconsulta" type="text">
+                    <span class="label">Localizar</span>
+                    <span class="informer">Digite o nome para buscar</span>
+                    <span class="placeholder">Digite o nome para buscar</span>
+                    <button id="btnConsulta" class="button"><span class="mif-search"></span></button>
+                </div>
+                <table id="gridUsuarios">
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#inserirUsuario').on('click', function ()
+    {
+        var usuarioNovo = new Usuario();
+        usuarioNovo = pegarDadosForumularioUsuarios();
+
+        if (!usuarioNovo.validaSenha($("#passwd1").val(), $("#passwd2").val()))
+            return false;
+        usuarioNovo.passwd = $('#passwd1').val();
+
+        if (usuarioNovo === false)
+            return;
+
+        var admin = new Admin();
+        var titulo = "Cadastro de usuários";
+        var conteudo = "Deseja cadastrar o usuário \'"
+                + usuarioNovo.nome + "\' ?";
+        
+        var callback = function ()
+        {
+            $.post('cadastrar-usuario',
+                    {
+                        usuario:
+                                {
+                                    admin: usuarioNovo.admin,
+                                    ativo: usuarioNovo.ativo,
+                                    nome: usuarioNovo.nome,
+                                    passwd: md5(usuarioNovo.passwd),
+                                    usr: usuarioNovo.usr.toLowerCase()
+                                },
+                        perfil: usuarioNovo.perfil
+                    },
+                    function (data, status)
+                    {
+                        $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                        if (data.status === 'success')
+                        {
+                            $("#gridUsuarios").bootstrapTable('refresh', {
+                                url: "/usuarios"
+                            });
+                            limpaTelaUsuarios();
+                        }
+                    }
+            );
+        };
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#atualizarUsuario').on('click', function ()
+    {
+        var usuarioNovo = new Usuario();
+        usuarioNovo = pegarDadosForumularioUsuarios();
+        usuarioNovo.passwd = $('#passwd1').val();
+        if (usuarioNovo === false)
+            return;
+
+        if (usuarioAntigo.id === null)
+        {
+            $.Notify({
+                caption: 'Erro',
+                content: 'Você não selecionou um usuário para atualizar!',
+                timeout: 10000,
+                type: 'alert'
+            });
+            return;
+        }
+
+        var admin = new Admin();
+        var titulo = "Atualização de usuários";
+        var conteudo = "Deseja Atualizar o usuário \'"
+                + usuarioAntigo.nome + "\' ?";
+
+        var callback = function ()
+        {
+            $.post('atualizar-usuario',
+                    {
+                        usuario:
+                                {
+                                    id: usuarioAntigo.id,
+                                    admin: usuarioNovo.admin,
+                                    ativo: usuarioNovo.ativo,
+                                    nome: usuarioNovo.nome,
+                                    passwd: md5(usuarioNovo.passwd),
+                                    usr: usuarioNovo.usr.toLowerCase()
+                                },
+                        perfil: usuarioNovo.perfil
+                    },
+                    function (data, status)
+                    {
+                        $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                        if (data.status === 'success')
+                        {
+                            $("#gridUsuarios").bootstrapTable('refresh', {
+                                url: "/usuarios"
+                            });
+                            limpaTelaUsuarios();
+                        }
+                    }
+            );
+        };
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    var usuarioAntigo = new Usuario();
+    var tiposObjetos = JSON.parse($('#tiposobjetos').val());
+
+    $("#gridUsuarios").bootstrapTable(
+            {
+                url: "/usuarios",
+                pageSize: 10,
+                pagination: true,
+                pagelist: [10, 100, 250], sidePagination: 'server',
+                columns: [
+                    {field: 'nome', title: 'Nome', width: '50%'},
+                    {field: 'usr', title: 'Usuário', width: '20%'},
+                    {field: 'admin', title: 'Admin', width: '20%'},
+                    {field: 'ativo', title: 'Ativo', width: '10%'}
+                ],
+                onClickRow: function (row) {
+                    usuarioAntigo = row;
+
+                    $('#nome').val(row.nome);
+                    $('#usr').val(row.usr);
+
+                    $('#ativo').prop("checked", row.ativo);
+                    $('#ativo').val(row.ativo);
+                    $('#inativo').prop("checked", !row.ativo);
+
+                    $('#normal').val(!row.admin);
+                    $('#normal').prop("checked", !row.admin);
+                    $('#admin').prop("checked", row.admin);
+
+                    for (var i = 0; i < tiposObjetos.length; i ++)
+                        $('#tipoObjeto' + tiposObjetos[i].id).prop('checked', false);
+
+                    $.post('usuario',
+                            {
+                                id: usuarioAntigo.id
+                            },
+                            function (data, status)
+                            {
+                                usuarioAntigo.perfil = JSON.parse(data);
+                                for (var i = 0; i < usuarioAntigo.perfil.length; i++)
+                                    if (usuarioAntigo.perfil[i].ativo)
+                                        $('#tipoObjeto' + usuarioAntigo.perfil[i].tipo_objeto).prop('checked', true);
+                            }
+                    );
+                }
+            }
+    );
+
+    $('#btnConsulta').on('click', function ()
+    {
+        $("#gridUsuarios").bootstrapTable('refresh', {
+            url: "/usuarios?txconsulta=" + $('#txconsulta').val()
+        });
+    });
+
+    function limpaTelaUsuarios()
+    {
+        $('#nome').val('');
+        $('#usr').val('');
+        $('#passwd1').val('');
+        $('#passwd2').val('');
+
+        $('#ativo').prop("checked", true);
+        $('#ativo').val(true);
+        $('#inativo').prop("checked", false);
+
+        $('#normal').val(true);
+        $('#normal').prop("checked", true);
+        $('#admin').prop("checked", false);
+
+        for (var i = 0; i < tiposObjetos.length; i ++)
+            $('#tipoObjeto' + tiposObjetos[i].id).prop('checked', false);
+
+        usuarioAntigo = new Usuario();
+    }
+
+    function pegarDadosForumularioUsuarios()
+    {
+        var usuarioNovo = new Usuario();
+
+        if (!usuarioNovo.validaNome($('#nome').val()))
+            return false;
+
+        usuarioNovo.nome = $('#nome').val();
+
+        if (!usuarioNovo.validaUsr($('#usr').val()))
+            return false;
+        usuarioNovo.usr = $('#usr').val();
+
+        usuarioNovo.ativo = $('#ativo').prop('checked');
+        usuarioNovo.admin = $('#admin').prop('checked');
+
+        for (var i = 0; i < tiposObjetos.length; i++)
+        {
+            usuarioNovo.perfil.push(new Perfil());
+            usuarioNovo.perfil[i].tipo_objeto = tiposObjetos[i].id;
+            usuarioNovo.perfil[i].ativo = $('#tipoObjeto' + tiposObjetos[i].id).prop('checked');
+        }
+        return usuarioNovo;
+    }
+    
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+                .toggleClass("selected")
+                .siblings(".selected")
+                .removeClass("selected");
+    });
+</script>

@@ -1,0 +1,235 @@
+<center><h1>Cadastro de Reserváveis</h1></center>
+<div class="container">
+    <div class="grid">
+        <div class="flex-grid">
+            <div class="row cell-auto-size">
+                <div class="cell">
+                    <center><h2>Inserção/atualização de reserváveis</h2></center>
+                    <div class="panel success">
+                        <div class="heading">
+                            <span class="title">Reservável</span>
+                        </div>
+                        <div class="row cells12">
+                            <div class="cell colspan7">
+                                <label class="block">Nome do objeto:</label>
+                                <div class="input-control text">
+                                    <input type="text"
+                                           id="objetodescricao"
+                                           value="" 
+                                           name="descricao" 
+                                           placeholder="Nome do objeto" 
+                                           data-validate-func="required"
+                                           data-validate-hint="O campo nome não deve ser vazio!">
+                                </div>
+                            </div>
+                            <div class="cell colspan5">
+                                <label class="block">Estado:</label>
+                                <label class="input-control radio">
+                                    <input type="radio"
+                                           id="ativo"
+                                           name="ativo"
+                                           value="true" 
+                                           checked>
+                                    <span class="check"></span>
+                                    <span class="caption">Ativo</span>
+                                </label>
+                                <label class="input-control radio">
+                                    <input type="radio"
+                                           id="inativo"
+                                           name="ativo"
+                                           value="false">
+                                    <span class="check"></span>
+                                    <span class="caption">Inativo</span>
+                                </label>
+                            </div>
+                        </div>                       
+                    </div>
+                    <div class="panel success">
+                        <div class="heading">
+                            <span class="title">Categoria</span>
+                        </div>
+                        <label class="block">Categoria do objeto:</label>
+                        <div class="input-control select">
+                            <select id="tipoobjeto">
+                                <% for(var i = 0; i < dados.tiposObjetos.length; i ++){ %>
+                                <option value="<%= dados.tiposObjetos[i].id %>">
+                                    <%= dados.tiposObjetos[i].descricao %>
+                                </option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <% for(var i = 0; i < dados.tiposObjetos.length; i ++){ %>
+                        <input id="tipoobjeto<%= dados.tiposObjetos[i].id %>" value="<%= dados.tiposObjetos[i].descricao %>" hidden="">
+                        <% } %>
+                    </div>
+                    <hr>
+                    <button id="inserirObjeto" class="button primary">Inserir</button>
+                    <button id="atualizarObjeto" class="button info" style="float: right;">Atualizar</button>
+                </div>
+                <div class="cell">
+
+                    <center><h2>Visualização das cursos reserváveis</h2></center>
+                    <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                        <input id="txconsulta" type="text">
+                        <span class="label">Localizar</span>
+                        <span class="informer">Digite o termo da busca</span>
+                        <span class="placeholder">Digite o termo da busca</span>
+                        <button id="btnConsulta" class="button"><span class="mif-search"></span></button>
+                    </div>
+                    <table id="gridObjetos">
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#inserirObjeto').on('click', function ()
+    {
+        var objNovo = new Curso();
+        var tipObjNovo = new TipoObjeto();
+        if (!objNovo.validaDescricao($('#objetodescricao').val()))
+            return;
+
+        objNovo.descricao = $('#objetodescricao').val();
+
+        objNovo.ativo = $('#ativo').prop('checked');
+        objNovo.tipo_objeto = $('#tipoobjeto option:selected').val();
+        tipObjNovo.descricao = $('#tipoobjeto' + objNovo.tipo_objeto).val();
+
+        var admin = new Admin();
+        var titulo = "Cadastro de Objetos";
+        var conteudo = "Deseja cadastrar o objeto \'"
+                + objNovo.descricao + "\' "
+                + "com ativo \'" + objNovo.ativo + '\''
+                + ' na categoria \'' + tipObjNovo.descricao + '\'?';
+
+        var callback = function ()
+        {
+            $.post('cadastrar-objeto',
+                    {
+                        descricao: objNovo.descricao,
+                        ativo: objNovo.ativo,
+                        tipo_objeto: objNovo.tipo_objeto
+                    },
+                    function (data, status)
+                    {
+                        $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                        if (data.status === 'success')
+                            $("#gridObjetos").bootstrapTable('refresh', {
+                                url: "/objetos"
+                            });
+                    });
+        };
+
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#atualizarObjeto').on('click', function ()
+    {
+        var objNovo = new Curso();
+        var tipObjNovo = new TipoObjeto();
+        if (!objNovo.validaDescricao($('#objetodescricao').val()))
+            return;
+
+        objNovo.descricao = $('#objetodescricao').val();
+
+        if (objAntigo.id.length === 0)
+        {
+            $.Notify({
+                caption: 'Erro',
+                content: 'Você não selecionou nenhum objeto para atualizar.',
+                timeout: 10000,
+                type: 'alert'
+            });
+            return;
+        }
+
+        objNovo.tipo_objeto = $('#tipoobjeto option:selected').val();
+        objNovo.ativo = $('#ativo').prop('checked');
+        tipObjNovo.descricao = $('#tipoobjeto' + objNovo.tipo_objeto).val();
+
+        var admin = new Admin();
+        var titulo = "Atualização de dados";
+        var conteudo = "Deseja atualizar os seguintes dados \'"
+                + objAntigo.descricao + "\' para \'" + objNovo.descricao + "\', "
+                + "com ativo de \'" + objAntigo.ativo + '\' para \'' + objNovo.ativo + '\' e '
+                + 'categoria \'' + tipObjAntigo.descricao + '\' para \'' + tipObjNovo.descricao + '\'?';
+
+        var callback = function ()
+        {
+            $.post('atualizar-objeto',
+                    {
+                        id: objAntigo.id,
+                        descricao: objNovo.descricao,
+                        ativo: objNovo.ativo,
+                        tipo_objeto: objNovo.tipo_objeto
+                    },
+                    function (data, status)
+                    {
+                        $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                        if (data.status === 'success')
+                            $("#gridObjetos").bootstrapTable('refresh', {
+                                url: "/objetos"
+                            });
+                    });
+        };
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#btnConsulta').on('click', function ()
+    {
+        $("#gridObjetos").bootstrapTable('refresh', {
+            url: "/objetos?txconsulta=" + $('#txconsulta').val()
+        });
+    });
+
+    var objAntigo = new Objeto();
+    var tipObjAntigo = new TipoObjeto();
+
+    $("#gridObjetos").bootstrapTable({
+        url: "/objetos",
+        pageSize: 10,
+        pagination: true,
+        pagelist: [8, 14, 21],
+        sidePagination: 'server',
+        columns: [
+            {field: 'objetodescricao', title: 'Objeto', halign: 'center', width: '45%'},
+            {field: 'tipoobjetodescricao', title: 'Categoria', width: '45%'},
+            {field: 'objetoativo', title: 'Ativo', width: '10%'}
+        ],
+        onClickRow: function (row) {
+            objAntigo.id = row.objetoid;
+            objAntigo.descricao = row.objetodescricao;
+            objAntigo.tipo_objeto = row.tipoobjetoid;
+            objAntigo.ativo = row.objetoativo;
+
+            tipObjAntigo.id = row.tipoobjetoid;
+            tipObjAntigo.descricao = row.tipoobjetodescricao;
+
+            $('#objetodescricao').val(row.objetodescricao);
+            $("#tipoobjeto").val(row.tipoobjetoid);
+
+            $('#ativo').prop("checked", row.objetoativo);
+            $('#ativo').val(row.objetoativo);
+            $('#inativo').prop("checked", !row.objetoativo);
+        }
+    });
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+                .toggleClass("selected")
+                .siblings(".selected")
+                .removeClass("selected");
+    });
+</script>

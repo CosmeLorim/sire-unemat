@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <meta name="description" content="Sistema de Reservas de Equipamentos, salas e laboratórios para a UNEMAT-BBG">
+        <meta name="author" content="Cosme da Silva Lorim (estagiário do SPD da UNEMAT de Barra do Bugres)">
+        <title>Reservas UNEMAT-BBG</title>
+    </head>
+    <body>
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+              <div class="navbar-header">
+                  <a class="navbar-brand" href="/">Reservas UNEMAT</a>
+              </div>
+          </div>
+      </nav>
+      <p style="padding: 20px"></p>
+      <center><h1>Criar Reservas</h1></center>
+      <div class="container">
+        <form action="/nova-reserva" method="post">
+          <div class="row">
+
+            <div class="col-md-2 col-sm-4 col-xs-6">
+              <div class="form-group">
+                <label for="dataDaReserva" class="col-form-label">Data da reserva</label><br>
+                <input name="dataDaReserva" type="date" id="dataDaReserva" value="2017/04/24">
+              </div>
+            </div>
+
+            <div class="col-md-4 col-xs-6">
+                <div class="form-group">
+                    <label for="usuarios" class="col-form-label">Usuário da reserva</label><br>
+                    <select class="" name="usuario" id="usuario">
+                      <option value="">Usuário</option>
+                      <% for(var i = 0; i < dados.usuarios.length; i++){ %>
+                        <option value="<%= dados.usuarios[i]._id %>"><%= dados.usuarios[i].nome %></option>
+                      <% } %>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-xs-6">
+                <div class="form-group">
+                    <label for="equipamentos" class="col-form-label">Equipamento</label><br>
+                    <select class="" name="equipamento" id="equipamento">
+                      <option value="">Equipamento</option>
+                      <% for(var i = 0; i < dados.equipamentos.length; i++){ %>
+                        <option value="<%= dados.equipamentos[i]._id %>"><%= dados.equipamentos[i].identificacao %></option>
+                      <% } %>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-xs-6">
+                <div class="form-group">
+                    <label for="salas_e_laboratorios" class="col-form-label">Sala ou Laboratório</label><br>
+                    <select class="" name="salasOuLaboratorio" id="salasOuLaboratorio">
+                      <option value="">Sala ou Laboratório</option>
+                      <% for(var i = 0; i < dados.salas_e_laboratorios.length; i++){ %>
+                        <option value="<%= dados.salas_e_laboratorios[i]._id %>"><%= dados.salas_e_laboratorios[i].identificacao %></option>
+                      <% } %>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-xs-12">
+                <div class="form-group">
+                    <label for="motivoDaReserva" class="col-form-label">Motivo da Reserva</label>
+                    <input type="motivoDaReserva" id="motivoDaReserva" value="" class="form-control" name="motivoDaReserva" placeholder="Motivo da Reserva">
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xs-12">
+              <div class="form-group">
+                <label for="grupo" class="">Horário de uso</label>
+                  <div class="row">
+                    <div class="col-xs-4">
+                      <div class="checkbox" active>
+                          <label><input type="checkbox" name="horario" value="7-9">7 às 9 horas</label>
+                      </div>
+                      <div class="checkbox">
+                          <label><input type="checkbox" name="horario" value="9-11">9 às 11 horas</label>
+                      </div>
+                    </div>
+                    <div class="col-xs-4">
+                      <div class="checkbox">
+                          <label><input type="checkbox" name="horario" value="13-15">13 às 15 horas</label>
+                      </div>
+                      <div class="checkbox">
+                          <label><input type="checkbox" name="horario" value="15-17">15 às 17 horas</label>
+                      </div>
+                    </div>
+                    <div class="col-xs-4">
+                      <div class="checkbox">
+                          <label><input type="checkbox" name="horario" value="19-21">19 às 21 horas</label>
+                      </div>
+                      <div class="checkbox">
+                          <label><input type="checkbox" name="horario" value="21-23">21 às 23 horas</label>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        <div class="form-group row">
+            <div class="col-xs-12">
+                <center><button type="submit" class="btn btn-primary">Cadastrar</button></center>
+            </div>
+        </div>
+      </form>
+    </div>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  </body>
+</html>

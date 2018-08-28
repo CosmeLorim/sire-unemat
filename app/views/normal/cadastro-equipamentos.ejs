@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/metro.css" rel="stylesheet">
+    <link href="css/metro-colors.css" rel="stylesheet">
+    <link href="css/metro-responsive.css" rel="stylesheet">
+    <link href="css/metro-rtl.css" rel="stylesheet">
+    <link href="css/metro-schemes.css" rel="stylesheet">
+    <link href="css/estilo.css" rel="stylesheet">
+    <meta name="description" content="Sistema de Reservas de Equipamentos, salas e laboratórios para a UNEMAT-BBG">
+    <meta name="author" content="Cosme da Silva Lorim (estagiário do SPD da UNEMAT de Barra do Bugres)">
+    <title>Reservas UNEMAT-BBG</title>
+  </head>
+  <body>
+    <nav class="app-bar">
+      <a class="app-bar-element" href="/">Reservas UNEMAT</a>
+    </nav>
+    <center><h1>Cadastro de Equipamentos</h1></center>
+    <div class="container">
+      <form action="/cadastrar-equipamento" method="post">
+        <div class="flex-grid">
+          <div class="row flex-just-center">
+
+            <div class="cell size2"></div>
+
+            <div class="cell size4 padding10">
+              <div class="input-controll text">
+                <label for="identificacao">Identificação</label>
+                <input type="text" class="form-controll" id="identificacao" value="" name="identificacao" placeholder="Identificação">
+              </div>
+            </div>
+
+            <div class="cell size4">
+              <div class="input-control textarea">
+                <center><label for="descricao">Descrição</label></center>
+                <textarea id="descricao" name="descricao" placeholder="Descrição"></textarea>
+              </div>
+            </div>
+
+          </div> <!--<div class="row flex-just-center">-->
+        </div>
+
+        <p style="padding:10px"></p>
+        <div class="row flex-just-center">
+          <div class="cell">
+            <center><button type="submit" class="button success block-shadow-info text-shadow">Cadastrar</button></center>
+          </div>
+        </div>
+      </form>
+    </div>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/metro.js"></script>
+  </body>
+</html>

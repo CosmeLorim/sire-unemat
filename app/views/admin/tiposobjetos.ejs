@@ -1,0 +1,197 @@
+<center><h1>Administração de Categorias</h1></center>
+<div class="container">
+    <div class="grid">
+        <div class="flex-grid">
+            <div class="row cell-auto-size">
+                <div class="cell">
+                    <center><h2>Inserção/atualização de categorias</h2></center>
+                    <div class="panel success">
+                        <div class="heading">
+                            <span class="title">Categoria</span>
+                        </div>
+                        <div class="row">
+                            <div class="cell">
+
+                                <label class="block">Nome do categoria:</label>
+                                <div class="input-control text" style="width: 100%;">
+                                    <input type="text"
+                                           id="descricao"
+                                           value="" 
+                                           name="descricao" 
+                                           placeholder="Nome da Categoria" 
+                                           data-validate-func="required"
+                                           data-validate-hint="O campo nome não deve ser vazio!">
+                                </div>
+                            </div>
+                            <div class="cell">
+                                <label class="block">Estado:</label>
+                                <label class="input-control radio">
+                                    <input type="radio"
+                                           id="ativo"
+                                           name="ativo"
+                                           value="true" 
+                                           checked>
+                                    <span class="check"></span>
+                                    <span class="caption">Ativo</span>
+                                </label>
+                                <label class="input-control radio">
+                                    <input type="radio"
+                                           id="inativo"
+                                           name="ativo"
+                                           value="false">
+                                    <span class="check"></span>
+                                    <span class="caption">Inativo</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <button id="inserirCategoria" class="button primary">Inserir</button>
+                    <button id="atualizarCategoria" class="button info" style="float: right;">Atualizar</button>
+
+                </div>
+                <div class="cell">
+                    <center><h2>Lista de categorias</h2></center>
+                    <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                        <input id="txconsulta" type="text">
+                        <span class="label">Localizar</span>
+                        <span class="informer">Digite o termo da busca</span>
+                        <span class="placeholder">Digite o termo da busca</span>
+                        <button id="btnConsulta" class="button"><span class="mif-search"></span></button>
+                    </div>
+                    <table id="gridCategorias">
+
+                    </table>
+                </div>
+            </div>
+            <p style="padding:10px"></p>
+        </div>
+    </div>
+</div>
+<script>
+    $('#inserirCategoria').on('click', function () {
+        var tipObjNovo = new TipoObjeto();
+        if (!tipObjNovo.validaDescricao($('#descricao').val()))
+            return;
+
+        tipObjNovo.descricao = $('#descricao').val();
+        tipObjNovo.ativo = $('#ativo').prop('checked');
+
+        var titulo = "Cadastro de categoria";
+        var conteudo = "Deseja cadastrar a categoria \'"
+                + tipObjNovo.descricao + "\'?";
+        var callback = function ()
+        {
+            $.post('cadastrar-tipoobjeto',
+                    {
+                        descricao: tipObjNovo.descricao,
+                        ativo: tipObjNovo.ativo
+                    },
+                    function (data, status)
+                    {
+                        $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                        if (data.status === 'success')
+                            $("#gridCategorias").bootstrapTable('refresh', {
+                                url: "/tiposobjetos"
+                            });
+                    });
+        };
+
+        var admin = new Admin();
+
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#atualizarCategoria').on('click', function () {
+        var tipObjNovo = new TipoObjeto();
+        if (!tipObjNovo.validaDescricao($('#descricao').val()))
+            return;
+
+        tipObjNovo.descricao = $('#descricao').val();
+        tipObjNovo.ativo = $('#ativo').prop('checked');
+
+        var id = $('#id').val();
+        $('#id').val('');
+
+        if (id === "")
+        {
+            $.Notify({
+                caption: 'Erro',
+                content: 'Você não selecionou uma categoria para atualizar',
+                timeout: 10000,
+                type: 'alert'
+            });
+            return;
+        }
+
+        var titulo = "Atualização de dados";
+        var conteudo = "Deseja atualizar os seguintes dados \'"
+                + TipObjAntigo.descricao + "\' para \'" + tipObjNovo.descricao + "\'?";
+        var callback = function ()
+        {
+            $.post('atualizar-tipoobjeto',
+            {
+                id: TipObjAntigo.id,
+                descricao: tipObjNovo.descricao,
+                ativo: tipObjNovo.ativo
+            }, function (data, status)
+            {
+                $.Notify({
+                    caption: data.title,
+                    content: data.msg,
+                    timeout: 10000,
+                    type: data.status
+                });
+                if (data.status === 'success')
+                    $("#gridCategorias").bootstrapTable('refresh', {
+                        url: "/tiposobjetos"
+                    });
+            });
+        };
+
+        var admin = new Admin();
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    $('#btnConsulta').on('click', function ()
+    {
+        $("#gridCategorias").bootstrapTable('refresh', {
+            url: "/tiposobjetos?txconsulta=" + $('#txconsulta').val()
+        });
+    });
+
+    var TipObjAntigo = new TipoObjeto();
+
+    $("#gridCategorias").bootstrapTable({
+        url: "/tiposobjetos",
+        pageSize: 10,
+        pagination: true,
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            {field: 'descricao', title: 'Categoria', width: '80%'},
+            {field: 'ativo', title: 'Ativo', width: '20%'}
+        ],
+        onClickRow: function (row) {
+            TipObjAntigo.id = row.id;
+            TipObjAntigo.descricao = row.descricao;
+            TipObjAntigo.ativo = row.ativo;
+
+            $('#descricao').val(row.descricao);
+
+            $('#ativo').prop("checked", row.ativo);
+            $('#ativo').val(row.ativo);
+            $('#inativo').prop("checked", !row.ativo);
+        }
+    });
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+                .toggleClass("selected")
+                .siblings(".selected")
+                .removeClass("selected");
+    });
+</script>
