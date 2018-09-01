@@ -1,0 +1,150 @@
+<!-- CONSULTA DE USUÁRIOS -->
+<script>
+    $('#btnConsultaUsuarios').on('click', function () {
+        atualizaGridUsuarios();
+    });
+    
+    var usuarioAntigo = new Usuario();
+    var usuario = null;
+    $('#usuariopreviewinsercao').html('Usuário não selecionado');
+
+    $("#gridUsuarios").bootstrapTable( {
+        url: "/api/usuarios",
+        pageSize: 10,
+        pagination: true,
+        locale: 'pt-BR',
+        queryParams: function(params) {
+            return {
+                limit: params.limit,
+                offset: params.offset,
+                order: params.order,
+                txConsulta: $('#txConsultaUsuarios').val()
+            };
+        },
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            { field: 'nome', title: 'Nome', width: '70%' },
+            { field: 'usr', title: 'Usuário', width: '30%', formatter: usuarioAntigo.formatarUsr },
+        ],
+        onClickRow: function (row) {
+            if(usuario !== row.id)
+            {
+                usuario = row.id;
+                $('#usuariopreviewinsercao').html(row.nome);
+            } else {
+                usuario = null;
+                $('#usuariopreviewinsercao').html('Usuário não selecionado');
+            }
+        }
+    });
+
+    function atualizaGridUsuarios()
+    {
+        $("#gridUsuarios").bootstrapTable('refresh', {
+            url: "/api/usuarios",
+            query: {
+                txConsulta: $('#txConsultaUsuarios').val()
+            }
+        });
+    }
+</script>
+
+<!-- CONSULTA DE DISCIPLINAS NÃO OFERECIDAS -->
+<script>
+    $('#btnConsultaDisciplinas').on('click', function () {
+        atualizaGridDisciplinas();
+    });
+
+    $("#gridDisciplinas").bootstrapTable(
+    {
+        url: "/api/disciplinas/ativas/nao-oferecidas",
+        pageSize: 10,
+        pagination: true,
+        locale: 'pt-BR',
+        queryParams: function(params) {
+            return {
+                limit: params.limit,
+                offset: params.offset,
+                order: params.order,
+                curso: $('#curso option:selected').val(),
+                txConsulta: $('#txConsultaDisciplina').val()
+            };
+        },
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            {field: 'disciplinadescricao', title: 'Disciplinas', width: '40%'},
+            {field: 'disciplinasigla', title: 'Sigla', width: '15%'},
+            {field: 'cursosigla', title: 'Curso', width: '5%'},
+            {field: 'disciplinacargahoraria', title: 'Carga Horária', width: '10%'},
+            {field: 'disciplinasemestre', title: 'Semestre', width: '5%'}
+        ],
+        onClickRow: function (row) {
+            $('#disciplinaSelecionada').html(row.disciplinadescricao + ' - ' + row.cursosigla);
+            $('#disciplinainsercao').val(row.disciplinaid);
+        }
+    });
+
+    function atualizaGridDisciplinas() {
+        $("#gridDisciplinas").bootstrapTable('refresh', {
+            url: "/api/disciplinas/ativas/nao-oferecidas",
+            query: {
+                txConsulta: $('#txConsultaDisciplina').val(),
+                curso: typeof($('#curso option:selected').val()) === 'undefined' ? '0' : $('#curso option:selected').val()
+            }
+        });
+    }
+</script>
+
+<!-- CADASTRO DO OFERECIMENTO -->
+<script>
+    $('#inserirOferecimento').on('click', function () {
+        var admin = new Admin();
+        var titulo = "Cadastro de período";
+        var conteudo = "Deseja cadastrar o oferecimento?";
+
+        var callback = function () {
+            $.post('/api/oferecimento',
+                {
+                    disciplina: $('#disciplinainsercao').val(),
+                    periodo: periodo,
+                    usuario: usuario
+                },
+                function (data, status){
+                    $.Notify({
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        });
+                    if (data.status === 'success') {
+                        atualizaGridOferecimentos();
+                        atualizaGridDisciplinas();
+                    }
+                });
+        };
+
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    var periodo = null;
+
+    $("#formularioOferecimentos").wizard2({
+            onNext: function () {
+                if(usuario === null) {
+                    $.Notify({
+                            caption: 'Usuário não selecionou.',
+                            content: 'Você não selecionou o usuário para o oferecimento.',
+                            timeout: 10000,
+                            type: 'warning'
+                        });
+                    return false;
+                }
+                
+                periodo = $('#periodo').val();
+                $('#disciplinainsercao').val('');
+                $('#periodopreviewinsercao').html('<%= periodo.nome %>');
+                return true;
+            }
+        }
+    );
+</script>

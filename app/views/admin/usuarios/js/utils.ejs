@@ -1,0 +1,45 @@
+<script>
+    function limpaTelaUsuarios()
+    {
+        $('#nome').val('');
+        $('#usr').val('');
+        $('#passwd1').val('');
+        $('#passwd2').val('');
+
+        $('#normal').val(true);
+        $('#normal').prop("checked", true);
+        $('#admin').prop("checked", false);
+
+        for (var i = 0; i < tiposObjetos.length; i ++)
+            $('#tipoObjeto' + tiposObjetos[i].id).prop('checked', false);
+
+        usuarioAntigo = new Usuario();
+    }
+
+    function pegarDadosFormularioUsuarios()
+    {
+        var usuarioNovo = new Usuario();
+
+        if (!usuarioNovo.validaNome($('#nome').val()))
+            return false;
+
+        usuarioNovo.nome = $('#nome').val();
+
+        if (!usuarioNovo.validaUsr($('#usr').val()))
+            return false;
+
+        usuarioNovo.usr = $('#usr').mask();
+
+        usuarioNovo.admin = $('#admin').prop('checked');
+        
+        for (var i = 0; i < tiposObjetos.length; i++)
+        {
+            usuarioNovo.perfil.push({});
+            usuarioNovo.perfil[i].tipoObjeto = tiposObjetos[i].id;
+            usuarioNovo.perfil[i].ativo = $('#tipoObjeto' + tiposObjetos[i].id).prop('checked');
+        }
+        return usuarioNovo;
+    }
+
+    $('#usr').mask('999.999.999-99');
+</script>

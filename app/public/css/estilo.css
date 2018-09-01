@@ -31,10 +31,15 @@ body {
     min-height: 100%;
     height: 100%;
 }
+
 .table .input-control.checkbox {
     line-height: 1;
     min-height: 0;
     height: auto;
+}
+
+.input-control.text {
+    width: 100%;
 }
 
 .text{
@@ -57,10 +62,12 @@ body {
     width: 40%;
 }
 
-table { width: 50% }
-tbody tr:hover.selected td,
-tbody tr:hover td {
-    background-color: #60a917 !important;
+table {
+    width: 50%;
+}
+
+tbody tr:hover.selected td, tbody tr:hover td {
+    background-color: #a2b98a !important;
     cursor: pointer;
 }
 
@@ -102,4 +109,55 @@ li.page-last-separator{
 
 li.page-last{
     list-style-type: none !important;
+}
+
+.wiz-btn-help, .wiz-btn-finish {
+    display: none !important;
+}
+
+#inserirOferecimento, #cancelarOferecimento {
+    float: right;
+    vertical-align: bottom;
+}
+
+.wizard2 {
+    height: 650px;
+}
+
+.step {
+    height: 650px !important;
+}
+
+.select2 {
+    width: 70% !important;
+}
+
+.destaque {
+    font-weight: bold;
+}
+
+#conteudo {
+    background-image: url("/images/unemat-logo-40-anos-min.jpg");
+    background-size: cover;
+    width: 100%;
+}
+
+.text-destaque {
+    font-weight: bold;
+}
+
+.logo-brazao {
+    height: 95%;
+}
+
+.input-control.required input {
+    border: 1px solid #1ba1e2;
+}
+
+.input-control span input.required {
+    border: 1px solid #1ba1e2;
+}
+
+.select2-selection__clear {
+    visibility: hidden;
 }

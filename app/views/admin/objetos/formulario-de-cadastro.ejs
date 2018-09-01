@@ -1,0 +1,62 @@
+<center><h2>Formulário de <span id="titulo-acao">cadastro</span> objetos</h2></center>
+<form data-role="validator" data-on-submit="return false" data-hint-mode="line">
+    <div class="panel success">
+        <div class="heading">
+            <span class="title">Objeto</span>
+        </div>
+        <div class="row cells12">
+            <div class="cell colspan7">
+                <label class="block">Nome do objeto:</label>
+                <div class="input-control text">
+                    <input type="text"
+                            id="descricao"
+                            value="" 
+                            name="descricao"
+                            data-validate-func="required, maxlength"
+                            data-validate-arg=", 30"
+                            data-validate-hint="O campo requerido com limite de 30 caracteres.">
+                </div>
+            </div>
+            <div class="cell colspan5">
+                <label class="block">Estado:</label>
+                <label class="input-control radio">
+                    <input type="radio"
+                            id="ativo"
+                            name="ativo"
+                            value="true" 
+                            checked>
+                    <span class="check"></span>
+                    <span class="caption">Ativo</span>
+                </label>
+                <label class="input-control radio">
+                    <input type="radio"
+                            id="inativo"
+                            name="ativo"
+                            value="false">
+                    <span class="check"></span>
+                    <span class="caption">Inativo</span>
+                </label>
+            </div>
+        </div>                       
+    </div>
+    <div class="panel success">
+        <div class="heading">
+            <span class="title">Categoria</span>
+        </div>
+        <label class="block">Categoria do objeto:</label>
+        <div class="input-control select full-size">
+            <select id="tipo-objeto">
+                <% tiposObjetos.forEach(tipoObjeto => { %>
+                    <option value="<%= tipoObjeto.id %>">
+                        <%= tipoObjeto.descricao %>
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+    </div>
+    <hr>
+    <div class="align-center">
+        <button id="btn-acao" class="button primary"><span id="descricao-btn-acao">Cadastrar</span></button>
+        <a id="btn-cancelar" class="button warning">Cancelar</a>
+    </div>
+</form>

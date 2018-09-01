@@ -1,20 +1,34 @@
+/**
+ * Exporta o módulo de rotas de Cursos
+ * 
+ * @param {Application} application 
+ */
 module.exports = (application) =>
 {
-    /*                API DE CURSOS                                */
-    application.get('/cursos', (request, response) =>
+    const utils = application.app.controllers.utils;
+    const cursosCtrl = application.app.controllers.cursos;
+
+    /* Renderiza a partícula de administração de cursos */
+    application.get("/cursos", (request, response) =>
     {
-        application.app.controllers.cursos.recuperarObjetos(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, cursosCtrl.administrar);
     });
-    application.get('/administrar-cursos', (request, response) =>
+
+    /* Busca dados referentes a cursos */
+    application.get("/api/cursos", (request, response) =>
     {
-        application.app.controllers.cursos.administrar(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, cursosCtrl.buscar);
     });
-    application.post('/cadastrar-curso', (request, response) =>
+
+    /* Cadastra um novo curso */
+    application.post("/api/cursos", (request, response) =>
     {
-        application.app.controllers.cursos.inserir(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, cursosCtrl.inserir);
     });
-    application.post('/atualizar-curso', (request, response) =>
+
+    /* Atualiza um curso */
+    application.put("/api/cursos/:id", (request, response) =>
     {
-        application.app.controllers.cursos.atualizar(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, cursosCtrl.atualizar);
     });
 };

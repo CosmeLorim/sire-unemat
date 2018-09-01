@@ -1,24 +1,40 @@
+/**
+ * Exporta o módulo de rotas de Usuários
+ * 
+ * @param {Application} application 
+ */
 module.exports = function (application)
 {
-    /*                API DE USUÁRIOS                                */
-    application.get('/usuarios', (request, response) =>
+    const utils = application.app.controllers.utils;
+    const usuariosCtrl = application.app.controllers.usuarios;
+
+    /* Renderiza a partícula de administração de usuários */
+    application.get("/usuarios", (request, response) =>
     {
-        application.app.controllers.usuarios.recuperarTodos(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, usuariosCtrl.administrar);
     });
-    application.get('/administrar-usuarios', (request, response) =>
+
+    /* Busca dados referentes a usuários */
+    application.get("/api/usuarios", (request, response) =>
     {
-        application.app.controllers.usuarios.administrar(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, usuariosCtrl.buscar);
     });
-    application.post('/usuario', (request, response) =>
+
+    /* Busca dados de um usuário expecífico */
+    application.get("/api/usuarios/:id", (request, response) =>
     {
-        application.app.controllers.usuarios.recuperarUm(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, usuariosCtrl.buscarUm);
     });
-    application.post('/cadastrar-usuario', (request, response) =>
+
+    /* Cadastra um novo usuário */
+    application.post("/api/usuarios", (request, response) =>
     {
-        application.app.controllers.usuarios.inserir(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, usuariosCtrl.inserir);
     });
-    application.post('/atualizar-usuario', (request, response) =>
+
+    /* Atualiza um usuário */
+    application.put("/api/usuarios/:usr", (request, response) =>
     {
-        application.app.controllers.usuarios.atualizar(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, usuariosCtrl.atualizar);
     });
 };

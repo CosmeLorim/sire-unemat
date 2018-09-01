@@ -1,0 +1,41 @@
+<script>
+    function contadorRegressivo (config)
+    {
+        config.tempoSessao = typeof(config.tempoSessao) !== "undefined" ? config.tempoSessao : 10 * 60 * 1000;
+        config.destinoFimSessao = typeof(config.destinoFimSessao) !== "undefined" ? config.destinoFimSessao : '/sair';
+        config.elemento = typeof(config.elemento) !== "undefined" ? config.elemento : 'temposessao';
+
+        function formatarDiaOuMes (dia) {
+            return parseInt(dia) < 10? '0' + parseInt(dia) : dia;
+        }
+
+        var timeStampRestante = config.tempoSessao;
+
+        var diferencaDeFusoHorario = new Date(0).getTimezoneOffset() * 60 * 1000;
+
+        var contadorRegressivoSessao = setInterval(function()
+        {
+            var contador = new Date(timeStampRestante + diferencaDeFusoHorario);
+
+            var horas = contador.getHours();
+            var minutos = formatarDiaOuMes(contador.getMinutes());
+            var segundos = formatarDiaOuMes(contador.getSeconds());
+
+            document.getElementById(config.elemento).innerHTML = horas + ":" + minutos + ":" + segundos;
+            
+            if (Date.parse(timeStampRestante) < 0) {
+                setTimeout(function()
+                {
+                    localStorage.clear();
+                    window.location = config.destinoFimSessao;
+                }, 1000)
+            }
+            timeStampRestante -= 1000;
+        }, 1000);
+        
+        $(document).ajaxComplete(function()
+        {
+            timeStampRestante = config.tempoSessao;
+        })
+    }
+</script>

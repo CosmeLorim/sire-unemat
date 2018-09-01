@@ -1,0 +1,279 @@
+<script>
+    $('#descricaooperacao').val('');
+
+    $('#efetuarReserva').on('click', function () {
+        var reservaNova = new Reserva();
+
+        reservaNova.oferecimento = $('#oferecimentoid').val();
+        if (!reservaNova.validaOferecimento(reservaNova.oferecimento))
+            return;
+
+        reservaNova.objeto = $('#objetoid').val();
+        if (!reservaNova.validaObjeto(reservaNova.objeto))
+            return;
+
+        $('input[name="horario"]').each(function ()
+        {
+            reservaNova.horarios.push({checked: $(this).is(':checked'), campo: $(this).val()});
+        });
+        if (!reservaNova.validaHorarios(reservaNova.horarios))
+            return;
+
+        var datas = $('#reservadatas').calendar('getDates');
+        $.each(datas, function (indice, data)
+        {
+            dia = data.slice(8, 10);
+            mes = data.slice(5, 7);
+            ano = data.slice(0, 4);
+            reservaNova.datas.push({dia: dia, mes: mes, ano: ano});
+        });
+        if (!reservaNova.validaDatas(reservaNova.datas))
+            return;
+
+        reservaNova.descricaoOperacao = $('#descricaooperacao').val();
+        if (!reservaNova.validaDescricaoOperacao(reservaNova.descricaoOperacao))
+            return;
+
+        var admin = new Admin();
+        var titulo = "Cadastro de reserva";
+        var conteudo = "Deseja efetuar a reserva?";
+        var callback = function ()
+        {
+            $.post('/api/reserva',
+                {
+                    oferecimento: reservaNova.oferecimento,
+                    objeto: reservaNova.objeto,
+                    horarios: reservaNova.horarios,
+                    datas: reservaNova.datas,
+                    descricaoOperacao: reservaNova.descricaoOperacao
+                }, function (data, status)
+                {
+                    $.Notify(
+                        {
+                            caption: data.title,
+                            content: data.msg,
+                            timeout: 10000,
+                            type: data.status
+                        }
+                    );
+
+                    if (data.reservasConflitantes !== undefined)
+                    {
+                        var datasReservasConflitantes = '';
+                        $.each(data.reservasConflitantes, function (indice, data)
+                        {
+                            data = timesTampParaData(data * 1000);
+                            datasReservasConflitantes = datasReservasConflitantes + data.dia + '/' + data.mes + '/' + data.ano + ' - ';
+                        });
+
+                        datasReservasConflitantes = datasReservasConflitantes.substring(0, datasReservasConflitantes.length - 3);
+
+                        var mensagemReservaEmConflito =
+                            '<h5>Houve conflito de Reservas em:</h5>' +
+                            '<p>' + datasReservasConflitantes + '</p>';
+
+                        $('#reservasConflitantes').html(mensagemReservaEmConflito);
+                    } else
+                    {
+                        $('#reservasConflitantes').html('');
+                    }
+                }
+            );
+        };
+
+        admin.dialog(titulo, conteudo, callback);
+    });
+
+    /**
+     * Altera o estado dos selects de horários de aulas
+     * 
+     * @param {Object} opcoes 
+     * @param {String} dados.horario
+     * @param {Boolean} dados.selecionado
+     * @param {function({error: Error}, {results: QueryResult}): void} callback
+     */
+    function alterarSelecaoAulas(opcoes)
+    {
+        var horarios;
+        opcoes.selecionado = typeof(Boolean(opcoes.selecionado)) !== 'boolean' ? true : Boolean(opcoes.selecionado);
+
+        switch (opcoes.horario)
+        {
+            case 'mat':
+                horarios = 'mat_aula_1mat_aula_2mat_aula_3mat_aula_4';
+                break;
+            
+            case 'vesp':
+                horarios = 'vesp_aula_1vesp_aula_2vesp_aula_3vesp_aula_4';
+                break;
+
+            case 'not':
+                horarios = 'not_aula_1not_aula_2not_aula_3not_aula_4';
+                break;
+            
+            case 'esp':
+                horarios = 'almocojanta';
+                break;
+            
+            default:
+                console.log('horário informado incorreto!');
+                return;
+        };
+        
+        $('input[name="horario"]').each(function ()
+        {
+            if(horarios.indexOf($(this).val()) !== -1)
+            {
+                $(this).prop('checked', opcoes.selecionado);
+            }
+        });
+    };
+
+    $('#diasDaSemana1,#diasDaSemana2,#diasDaSemana3,#diasDaSemana4,#diasDaSemana5,#diasDaSemana6,#diasDaSemana7').on('click', function()
+    {
+        /**
+        * Datas minímas e máximas para reservar
+        */
+        var dataMin = new Date($('#reservadatas').attr('data-min-date'));
+        var dataMax = new Date($('#reservadatas').attr('data-max-date'));
+        
+        var timeStampDeUmDia = 86400000;
+        var diaSelecionado = $(this).val();
+        var novosDias = [];
+        
+        /** 
+         * Primeiro dia da lista para adicionar ao calendário de reservas
+        */
+        novosDias.push(dataMin.getDay() <= diaSelecionado
+        ? new Date((dataMin.getDay() - diaSelecionado) * -1 * timeStampDeUmDia + Date.parse(dataMin))
+        : new Date((diaSelecionado - dataMin.getDay() +7)  * timeStampDeUmDia + Date.parse(dataMin))) ;
+
+        /**
+         * Finaliza caso o primeiro dia ultrapasse a data máxima 
+         */
+         if(Date.parse(dataMax) < Date.parse(novosDias[novosDias.length -1]))
+            return;
+
+        var timeStampUltimoDia, ultimoDia = '';
+        do {
+            timeStampUltimoDia = Date.parse(novosDias[novosDias.length -1]);
+            
+            ultimoDia = String(novosDias[novosDias.length -1].getMonth() +1) + '-';
+            ultimoDia += novosDias[novosDias.length -1].getDate() + '-';
+            ultimoDia += novosDias[novosDias.length -1].getFullYear();
+            $('#reservadatas').calendar('setDate', ultimoDia);
+
+            novosDias.push(new Date(timeStampUltimoDia + (timeStampDeUmDia * 7)));
+        } while (Date.parse(dataMax) >= Date.parse(novosDias[novosDias.length -1]));
+
+        atualizaSumarioDatas();
+    })
+
+    /**
+     * Oculta e mostra botões de marcar e desmarcar botões de marcar as 4 aulas
+     * 
+     * @param {Object} opcoes 
+     * @param {String} dados.btn
+     * @param {String} dados.horario[]
+     * @param {Boolean} dados.visibilidade
+     * @param {function({error: Error}, {results: QueryResult}): void} callback
+     */
+    function ocultarBtnMarque(opcoes)
+    {
+        if(opcoes.visibilidade)
+        {
+            for (let iterador = 0, horario = opcoes.horario; iterador < opcoes.horario.length; iterador++) {
+                $('#btn-' + opcoes.btn + '-aulas-' + horario[iterador] + '').show();
+            }
+        } else {
+            for (let iterador = 0, horario = opcoes.horario; iterador < opcoes.horario.length; iterador++) {
+                $('#btn-' + opcoes.btn + '-aulas-' + horario[iterador] + '').hide();
+            }
+        }       
+    }
+
+    ocultarBtnMarque({ btn:'desmarque', horario: [ 'mat', 'vesp', 'not', 'esp' ], visibilidade: false });
+
+    /** 
+     * Botões de marcar 4 aulas
+    */
+    $('#btn-marque-aulas-mat').on('click', function()
+    {
+        alterarSelecaoAulas({ horario: 'mat', selecionado: true });
+        ocultarBtnMarque({ btn: 'desmarque', horario: ['mat'], visibilidade: true });
+        ocultarBtnMarque({ btn: 'marque', horario: ['mat'], visibilidade: false });
+    });
+
+    $('#btn-marque-aulas-vesp').on('click', function()
+    {
+        alterarSelecaoAulas({ horario: 'vesp', selecionado: true });
+        ocultarBtnMarque({ btn: 'desmarque', horario: ['vesp'], visibilidade: true });
+        ocultarBtnMarque({ btn: 'marque', horario: ['vesp'], visibilidade: false });
+    });
+
+    $('#btn-marque-aulas-not').on('click', function()
+    {
+        alterarSelecaoAulas({ horario: 'not', selecionado: true });
+        ocultarBtnMarque({ btn: 'desmarque', horario: ['not'], visibilidade: true });
+        ocultarBtnMarque({ btn: 'marque', horario: ['not'], visibilidade: false });
+    });
+
+    $('#btn-marque-aulas-esp').on('click', function()
+    {
+        alterarSelecaoAulas({ horario: 'esp', selecionado: true });
+        ocultarBtnMarque({ btn: 'desmarque', horario: ['esp'], visibilidade: true });
+        ocultarBtnMarque({ btn: 'marque', horario: ['esp'], visibilidade: false });
+    });
+
+    /** 
+     * Botões de desmarcar 4 aulas
+    */
+    $('#btn-desmarque-aulas-mat').on('click', function()
+    {
+        alterarSelecaoAulas({ horario: 'mat', selecionado: false });
+        ocultarBtnMarque({ btn: 'marque', horario: ['mat'], visibilidade: true });
+        ocultarBtnMarque({ btn: 'desmarque', horario: ['mat'], visibilidade: false });
+    });
+
+    $('#btn-desmarque-aulas-vesp').on('click', function()
+    {
+        alterarSelecaoAulas({ horario: 'vesp', selecionado: false });
+        ocultarBtnMarque({ btn: 'marque', horario: ['vesp'], visibilidade: true });
+        ocultarBtnMarque({ btn: 'desmarque', horario: ['vesp'], visibilidade: false });
+    });
+
+    $('#btn-desmarque-aulas-not').on('click', function()
+    {
+        alterarSelecaoAulas({ horario: 'not', selecionado: false });
+        ocultarBtnMarque({ btn: 'marque', horario: ['not'], visibilidade: true });
+        ocultarBtnMarque({ btn: 'desmarque', horario: ['not'], visibilidade: false });
+    });
+
+    $('#btn-desmarque-aulas-esp').on('click', function()
+    {
+        alterarSelecaoAulas({ horario: 'esp', selecionado: false });
+        ocultarBtnMarque({ btn: 'marque', horario: ['esp'], visibilidade: true });
+        ocultarBtnMarque({ btn: 'desmarque', horario: ['esp'], visibilidade: false });
+    });
+
+    function atualizaSumarioDatas()
+    {
+        var datas = $('#reservadatas').calendar('getDates').sort();
+        var diasSelecionados = '';
+
+        $.each(datas, function(indice, data)
+        {
+            var dia = data.slice(8, 10);
+            var mes = data.slice(5, 7);
+            var ano = data.slice(0, 4);
+            diasSelecionados += dia + '/' + mes + '/' + ano + ' - ';
+        });
+
+        diasSelecionados = diasSelecionados.substring(0, diasSelecionados.length - 3);
+        $('#diasselecionados').html(diasSelecionados);
+
+        $(".calendar-btn-clear").on('click', function(){
+            atualizaSumarioDatas();
+        });
+    }
+</script>

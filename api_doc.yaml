@@ -1,0 +1,1097 @@
+swagger: '2.0'
+info:
+  version: 2.0.0
+  title: Sistema de Reservas UNEMAT API
+  description: Sistema de reservas de salas, equipamentos e laboratórios da UNEMAT, campus de Barra do Bugres
+  contact:
+    name: Cosme da Silva Lorim
+    url: https://github.com/CosmeLorim/
+    email: cosme.lorim@gmail.com
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: localhost:8080
+basePath: /api
+schemes: 
+  - http
+paths:
+  /autenticar:
+    post:
+      tags:
+      - Autenticação
+      summary: 'Efetua login no sistema'
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - name: login
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/DadosLogin'
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/RespostaLogin'
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+  /sair:
+    get:
+      tags:
+      - Autenticação
+      summary: Efetua Logoff
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/CursoConsulta'
+        500:
+          description: erro no servidor
+  /curso:
+    get:
+      tags: 
+      - Cursos
+      summary: Consulta cursos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters:
+      - name: 'txConsulta'
+        in: 'query'
+        required: true
+        description: A string para efetuar a consulta
+        type: string
+      - name: 'limit'
+        in: 'query'
+        required: true
+        description: Número máximo de resultados que a consulta deve retornar
+        type: integer
+        format: int32
+      - name: 'offset'
+        in: 'query'
+        required: true
+        description: Número de resultados que devem ser ignoraodos para a consulta
+        type: integer
+        format: int32
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/CursoConsulta'
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    post:
+      tags: 
+      - Cursos
+      summary: Adiciona novos cursos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Curso'
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    put:
+      tags: 
+      - Cursos
+      summary: Modifica cursos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Curso'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+  /tipo-objeto:
+    get:
+      tags: 
+      - Tipos de objetos
+      summary: Consulta tipos de objetos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters:
+      - name: 'txConsulta'
+        in: 'query'
+        required: true
+        description: A string para efetuar a consulta
+        type: string
+      - name: 'limit'
+        in: 'query'
+        required: true
+        description: Número máximo de resultados que a consulta deve retornar
+        type: integer
+        format: int32
+      - name: 'offset'
+        in: 'query'
+        required: true
+        description: Número de resultados que devem ser ignoraodos para a consulta
+        type: integer
+        format: int32
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/TipoObjetoConsulta'
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    post:
+      tags: 
+      - Tipos de objetos
+      summary: Adiciona novos tipos de objetos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/TiposObjeto'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    put:
+      tags: 
+      - Tipos de objetos
+      summary: Modifica tipos de objetos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/TiposObjeto'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+  /objeto:
+    get:
+      tags: 
+      - Objetos
+      summary: Consulta cursos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters:
+      - name: 'txConsulta'
+        in: 'query'
+        required: true
+        description: A string para efetuar a consulta
+        type: string
+      - name: 'limit'
+        in: 'query'
+        required: true
+        description: Número máximo de resultados que a consulta deve retornar
+        type: integer
+        format: int32
+      - name: 'offset'
+        in: 'query'
+        required: true
+        description: Número de resultados que devem ser ignoraodos para a consulta
+        type: integer
+        format: int32
+      responses:
+        200:
+          description: sucesso na operação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ObjetoConsulta'
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    post:
+      tags: 
+      - Objetos
+      summary: Adiciona novos objetos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Objeto'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    put:
+      tags: 
+      - Objetos
+      summary: Modifica tipos de objetos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Objeto'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+  /usuario:
+    get:
+      tags: 
+      - Usuários
+      summary: Consulta cursos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters:
+      - name: 'txConsulta'
+        in: 'query'
+        required: true
+        description: A string para efetuar a consulta
+        type: string
+      - name: 'limit'
+        in: 'query'
+        required: true
+        description: Número máximo de resultados que a consulta deve retornar
+        type: integer
+        format: int32
+      - name: 'offset'
+        in: 'query'
+        required: true
+        description: Número de resultados que devem ser ignoraodos para a consulta
+        type: integer
+        format: int32
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UsuarioConsulta'
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    post:
+      tags: 
+      - Usuários
+      summary: Adiciona novos usuários
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Usuario'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    put:
+      tags: 
+      - Usuários
+      summary: Modifica usuários
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Usuario'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+  /disciplina:
+    get:
+      tags: 
+      - Disciplinas
+      summary: Consulta cursos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters:
+      - name: 'txConsulta'
+        in: 'query'
+        required: true
+        description: A string para efetuar a consulta
+        type: string
+      - name: 'limit'
+        in: 'query'
+        required: true
+        description: Número máximo de resultados que a consulta deve retornar
+        type: integer
+        format: int32
+      - name: 'offset'
+        in: 'query'
+        required: true
+        description: Número de resultados que devem ser ignoraodos para a consulta
+        type: integer
+        format: int32
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DisciplinaConsulta'
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    post:
+      tags: 
+      - Disciplinas
+      summary: Adiciona novas disciplinas
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Disciplina'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    put:
+      tags: 
+      - Disciplinas
+      summary: Modifica disciplinas
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Disciplina'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+  /periodo:
+    get:
+      tags: 
+      - Períodos
+      summary: Consulta cursos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters:
+      - name: 'txConsulta'
+        in: 'query'
+        required: true
+        description: A string para efetuar a consulta
+        type: string
+      - name: 'limit'
+        in: 'query'
+        required: true
+        description: Número máximo de resultados que a consulta deve retornar
+        type: integer
+        format: int32
+      - name: 'offset'
+        in: 'query'
+        required: true
+        description: Número de resultados que devem ser ignoraodos para a consulta
+        type: integer
+        format: int32
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PeriodoConsulta'
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    post:
+      tags: 
+      - Períodos
+      summary: Adiciona novos períodos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Periodo'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    put:
+      tags: 
+      - Períodos
+      summary: Modifica períodos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Periodo'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+  /oferecimento:
+    get:
+      tags: 
+      - Oferecimentos
+      summary: Consulta oferecimentos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters:
+      - name: 'txConsulta'
+        in: 'query'
+        required: true
+        description: A string para efetuar a consulta
+        type: string
+      - name: 'limit'
+        in: 'query'
+        required: true
+        description: Número máximo de resultados que a consulta deve retornar
+        type: integer
+        format: int32
+      - name: 'offset'
+        in: 'query'
+        required: true
+        description: Número de resultados que devem ser ignoraodos para a consulta
+        type: integer
+        format: int32
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            $ref: '#/definitions/OferecimentoConsulta'
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    post:
+      tags: 
+      - Oferecimentos
+      summary: Adiciona novos oferecimentos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Oferecimento'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    put:
+      tags: 
+      - Oferecimentos
+      summary: Modifica oferecimentos
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/OferecimentoAlteracao'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+  /oferecimento/{oferecimentoId}:
+    delete:
+      tags: 
+      - Oferecimentos
+      summary: Desativa um oferecimento
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: path
+        name: 'oferecimentoId'
+        description: ID do oferecimento
+        required: true
+        type: integer
+        format: int32
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        404:
+          description: oferecimento não encontrado
+        500:
+          description: erro no servidor
+  /reservas:
+    get:
+      tags:
+      - Reservas
+      summary: Consulta de reservas do dia ou um determinado dia
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - name: 'dia'
+        in: 'query'
+        description: 'Dia do mês da consulta (requer: mês e ano)'
+        type: integer
+        format: int32
+      - name: 'mes'
+        in: 'query'
+        description: 'Mês da consulta (requer: dia e ano)'
+        type: integer
+        format: int32
+      - name: 'ano'
+        in: 'query'
+        description: 'Ano da consulta (requer: dia e mês)'
+        type: integer
+        format: int32
+      - name: 'tipoObjeto'
+        in: 'query'
+        description: Tipo do Objeto para filtragem da consulta
+        type: integer
+        format: int32
+      responses:
+        200:
+          description: sucesso na consulta
+          schema:
+            $ref: '#/definitions/Reserva'
+        404:
+          description: tipo de objeto não encontrada ou data inválida
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        500:
+          description: erro no servidor
+    post:
+      tags:
+      - Reservas
+      summary: Efetua reserva de objeto para vários dias em um determinado horário.
+      consumes: 
+      - application/json
+      produces: 
+      - application/json
+      parameters: 
+      - in: 'body'
+        name: 'cadastro-reservas'
+        description: Cadastro de novas reservas
+        required: true
+        schema:
+          $ref: '#/definitions/ReservaCadastro'
+      responses:
+        200:
+          description: sucesso na operação
+        401:
+          description: sem permissao
+          schema:
+            $ref: '#/definitions/RespostaApiOperacoes'
+        409:
+          description: conflito de registro
+          schema:
+            $ref: '#/definitions/RespostaConflitoReserva'
+        500:
+          description: erro no servidor
+definitions:
+  RespostaLogin:
+    type: object
+    properties:
+      admin:
+        type: boolean
+      nome:
+        type: string
+      usr:
+        type: string
+      primeiroLogin:
+        type: string
+  DadosLogin:
+    type: object
+    properties:
+      usr:
+        type: string
+        format: string[32]
+      passwd:
+        type: string
+        format: string[32]
+  Curso:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+      descricao:
+        type: string
+        format: string[120]
+      sigla:
+        type: string
+        format: string[10]
+  CursoConsulta:
+    type: object
+    properties:
+      curso:
+        $ref: '#/definitions/Curso'
+  TiposObjeto:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+      descricao:
+        type: string
+        format: string[30]
+  TipoObjetoConsulta:
+    type: object
+    properties:
+      tipoObjeto:
+        $ref: '#/definitions/TiposObjeto'
+  Objeto:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+      descricao:
+        type: string
+        format: string[30]
+      tipoObjeto:
+        type: integer
+        format: int32
+      ativo:
+        type: boolean
+  ObjetoConsulta:
+    type: object
+    properties:
+      objeto:
+        $ref: '#/definitions/Objeto'
+      tipoObjeto:
+        $ref: '#/definitions/TiposObjeto'
+  Usuario:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+      usr:
+        type: string
+        format: string[11]
+      nome:
+        type: string
+        format: string[120]
+      passwd:
+        type: string
+        format: string[32]
+      admin:
+        type: boolean
+  UsuarioSemSenha:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+      usr:
+        type: string
+        format: string[11]
+      nome:
+        type: string
+        format: string[120]
+      admin:
+        type: boolean
+  UsuarioConsulta:
+    type: object
+    properties:
+      usuario:
+        $ref: '#/definitions/UsuarioSemSenha'
+  Disciplina:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+      descricao:
+        type: string
+        format: string[100]
+      sigla:
+        type: string
+        format: string[10]
+      curso:
+        type: integer
+        format: int32
+      carga_horaria:
+        type: integer
+        format: int32
+      creditos:
+        type: string
+        format: string[10]
+      ativo:
+        type: boolean
+  DisciplinaConsulta:
+    type: object
+    properties:
+      disciplina:
+        $ref: '#/definitions/Disciplina'
+      curso:
+        $ref: '#/definitions/Curso'
+  Periodo:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+      nome:
+        type: string
+        format: string[6]
+      dataInicio:
+        type: integer
+        format: int32
+      dataFim:
+        type: integer
+        format: int32
+      ativo:
+        type: boolean
+  PeriodoConsulta:
+    type: object
+    properties:
+      periodo:
+        $ref: '#/definitions/Periodo'
+  Oferecimento:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+      disciplina:
+        type: integer
+        format: int32
+      usuario:
+        type: integer
+        format: int32
+  OferecimentoAlteracao:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+      usuario:
+        type: integer
+        format: int32
+  OferecimentoConsulta:
+    type: object
+    properties:
+      oferecimento:
+        $ref: '#/definitions/Oferecimento'
+  Reserva:
+    type: object
+    properties:
+      objeto:
+        type: integer
+        format: int32
+      descricao:
+        type: string
+        format: string[120]
+      data:
+        type: integer
+        format: int64
+      mat_aula_1:
+        type: boolean
+      mat_aula_2:
+        type: boolean
+      mat_aula_3:
+        type: boolean
+      mat_aula_4:
+        type: boolean
+      almoco:
+        type: boolean
+      vesp_aula_1:
+        type: boolean
+      vesp_aula_2:
+        type: boolean
+      vesp_aula_3:
+        type: boolean
+      vesp_aula_4:
+        type: boolean
+      janta:
+        type: boolean
+      not_aula_1:
+        type: boolean
+      not_aula_2:
+        type: boolean
+      not_aula_3:
+        type: boolean
+      not_aula_4:
+        type: boolean
+  ReservaCadastro:
+    type: object
+    properties:
+      oferecimento:
+        type: integer
+        format: int32
+      objeto:
+        type: integer
+        format: int32
+      horarios:
+        type: array
+        items:
+          type: object
+          properties:
+            checked:
+              type: boolean
+            campo:
+              type: string
+      datas:
+        type: object
+        properties:
+          dia:
+            type: integer
+            format: int32
+          mes:
+            type: integer
+            format: int32
+          ano:
+            type: integer
+            format: int32
+  RespostaConflitoReserva:
+    type: object
+    properties:
+      status:
+        type: string
+      title:
+        type: string
+      msg:
+        type: string
+      reservasConflitantes:
+        type: array
+        items:
+          type: integer
+          format: int64
+  RespostaApiOperacoes:
+    type: object
+    properties:
+      status:
+        type: string
+      title:
+        type: string
+      msg:
+        type: string

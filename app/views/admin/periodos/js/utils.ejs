@@ -1,0 +1,67 @@
+<script>
+    $('#data').daterangepicker({
+        "timePicker": false,
+        "opens": "rigth",
+        "drops": "down",
+        "locale": {
+            format: 'DD/MM/YYYY',
+            "separator": " | até | ",
+            "applyLabel": "Aplicar",
+            "cancelLabel": "Cancelar",
+            "fromLabel": "de",
+            "toLabel": "para",
+            "customRangeLabel": "Personalizado",
+            "daysOfWeek": [
+                "Dom",
+                "Seg",
+                "Ter",
+                "Qua",
+                "Qui",
+                "Sex",
+                "Sab"
+            ],
+            "monthNames": [
+                "Janeiro",
+                "Fevereiro",
+                "Março",
+                "Abril",
+                "Maio",
+                "junho",
+                "Julho",
+                "Agosto",
+                "Setembro",
+                "Outubro",
+                "Novembro",
+                "Dezembro"
+            ],
+            "firstDay": 1
+        },
+        "startDate": moment(),
+        "endDate": moment().add(1, 'M')
+    });
+
+    function utxToData(val) {
+        var d = moment.unix(val);
+        return moment(d).format('DD/MM/YYYY');
+    }
+
+    function limpaTelaPeriodos()
+    {
+        $('#id').val('');
+        $('#nome').val('');
+
+        $('#ativo').prop("checked", true);
+        $('#ativo').val(true);
+        $('#inativo').prop("checked", false);
+
+        $("#data").data('daterangepicker').setStartDate(moment.unix(moment())/1000);
+        $("#data").data('daterangepicker').setEndDate(moment.unix(moment().add(1, 'M')/1000));
+    }
+    
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+        .toggleClass("selected")
+        .siblings(".selected")
+        .removeClass("selected");
+    });
+</script>

@@ -1,116 +1,140 @@
-/*              RECUPERAÇÃO DE DADOS DE TIPOS DE OBJETOS                                */
-module.exports.recuperarObjetos = (application, request, response) =>
+/**
+ * Trata erros de chamadas assíncronas.
+ * 
+ * @param {String} error
+ */
+const tratativaErrosConsultas = (error, response) =>
 {
-    let _aux = request.query.txconsulta === undefined ? '' : request.query.txconsulta;
+    console.error(error);
+    response.send({ status: "alert", title: "Erro!", msg: "Erro no servidor." });
+}
 
-    const adcionais =
+/**
+ * Responde os dados de um intervalo de tipos de objetos conforme os dados oriundos da requisição.
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response
+ */
+module.exports.buscar = async (application, request, response) =>
+{
+    const dadosReq =
+    {
+        txConsulta: typeof(request.query.txConsulta) === "undefined" ? "%" : `%${request.query.txConsulta}%`,
+        limit: request.query.limit,
+        offset: request.query.offset,
+    };
+
+    if(typeof(dadosReq.txConsulta) === "undefined" || typeof(dadosReq.limit) === "undefined" || typeof(dadosReq.offset) === "undefined")
+    {
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+
+    const TiposObjetosDAO = new application.app.models.TiposObjetosDAO(application.config.dbConnection);
+
+    try {
+        const tiposObjetoConsulta = await TiposObjetosDAO.buscaIntervalo(
             {
-                ordem: request.query.order,
-                limit: request.query.limit,
-                offset: request.query.offset,
-                txconsulta: '%' + _aux + '%'
-            };
+                order: dadosReq.order,
+                limit: dadosReq.limit,
+                offset: dadosReq.offset,
+                txConsulta: dadosReq.txConsulta
+            });
 
-    const connection = application.config.dbConnection;
-    let TiposObjetosDAO = new application.app.models.TiposObjetosDAO(connection);
+        const count = tiposObjetoConsulta.pop().count;
+        const tiposObjeto = tiposObjetoConsulta.map(tipoObjeto => { return { tipoObjeto } })
 
-    let callback = (error, results) =>
+        response.send(JSON.stringify({ total: count, rows: tiposObjeto }));
+    } catch (error) {
+        tratativaErrosConsultas(error);
+    }
+};
+
+/**
+ * Responde a particula de administração de tipos de objetos.
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.administrar = (application, request, response) => { response.render('admin/tiposobjetos') };
+
+/**
+ * Cadastra um novo tipo de objeto.
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.inserir = async (application, request, response) =>
+{
+    if(typeof(request.body.tipoObjeto.descricao) === "undefined")
     {
-        if (error)
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+
+    const dadosReq = 
+    {
+        tipoObjeto: { descricao: request.body.tipoObjeto.descricao }
+    };
+
+    const TiposObjetosDAO = new application.app.models.TiposObjetosDAO(application.config.dbConnection);
+
+    try {
+        const buscaTipoObjeto = await TiposObjetosDAO.verificarSeExiste({ descricao: dadosReq.tipoObjeto.descricao });
+
+        if (buscaTipoObjeto[0].existe)
         {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro em recuperar objetos:', error);
-        } else
-        {
-            const count = results.rows[results.rows.length -1].count;
-            results.rows.pop();
-            
-            response.send(JSON.stringify(
-                    {
-                        total: count,
-                        rows: results.rows
-                    }
-            ));
+            response.send({ status: 'warning', title: 'Erro!', msg: 'Categoria já existe no banco.' });
+            return;
         }
+        
+        await TiposObjetosDAO.inserir({ descricao: dadosReq.tipoObjeto.descricao });
+
+        response.send({status: 'success', title: 'Sucesso!', msg: 'Categoria cadastrada com sucesso!'});
+    } catch (error) {
+        tratativaErrosConsultas(error);
+    }
+};
+
+/**
+ * Atualiza um tipo de objeto no banco de dados.
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.atualizar = async (application, request, response) =>
+{
+    if(request.params.id === "undefined" || typeof(request.body.tipoObjeto.descricao) === "undefined")
+    {
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+
+    const dadosReq = {
+        tipoObjeto: { id: request.params.id, descricao: request.body.tipoObjeto.descricao }
     };
-
-    TiposObjetosDAO.buscaIntervalo(adcionais, callback);
-};
-
-/*              ADMINISTRAÇÃO DOS CATEGORIAS                                */
-module.exports.administrar = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRotaAdminNaoAutenticado(application, request, response);
-        return;
-    }
     
-    response.render('admin/tiposobjetos');
-};
+    const TiposObjetosDAO = new application.app.models.TiposObjetosDAO(application.config.dbConnection);
 
-/*               CADASTRO DE TIPOS DE OBJETOS                                */
-module.exports.inserir = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRequisicoesNaoAutenticadas(application, request, response);
-        return;
-    }
-    
-    let dados = request.body;
-    const connection = application.config.dbConnection;
-    let TiposObjetosDAO = new application.app.models.TiposObjetosDAO(connection);
+    try {
+        let conflitoDeNome;
 
-    let callbackVerificacao = (error, results) =>
-    {
-        if (error)
+        conflitoDeNome = await TiposObjetosDAO.verificaConflitoDeNome({ id: dadosReq.tipoObjeto.id, descricao: dadosReq.tipoObjeto.descricao });
+        /* Evita atualização que cause conflito de nomes */
+        if(conflitoDeNome[0].existe)
         {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro na verificação de categoria: ', error);
-        } else
-        {
-            if (results.rowCount === 0)
-                TiposObjetosDAO.inserir([dados.descricao, dados.ativo], callbackInsercao);
-            else
-                response.send({status: 'alert', title: 'Erro!', msg: 'Categoria já existe no banco.'});
+            response.send({ status: "warning", title: "Erro!", msg: "Esta descrição já existe em outra categoria." });
+            return;
         }
-    };
 
-    let callbackInsercao = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro no cadastro de categoria: ', error);
-        } else
-            response.send({status: 'success', title: 'Sucesso!', msg: 'Categoria cadastrada com sucesso!'});
-    };
-    TiposObjetosDAO.busca(dados.descricao, callbackVerificacao);
-};
-
-/*              ATUALIZAÇÃO DE TIPOS DE OBJETOS                                */
-module.exports.atualizar = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRequisicoesNaoAutenticadas(application, request, response);
-        return;
+        await TiposObjetosDAO.atualizar({ id: dadosReq.tipoObjeto.id, descricao: dadosReq.tipoObjeto.descricao });
+    
+        response.send({ status: 'success', title: 'Sucesso!', msg: `Categoria ${dadosReq.tipoObjeto.descricao} atualizado com sucesso!` });
+    } catch (error) {
+        tratativaErrosConsultas(error, response);
     }
-    
-    let dados = request.body;
-    const connection = application.config.dbConnection;
-    let TiposObjetosDAO = new application.app.models.TiposObjetosDAO(connection);
-
-    let callback = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro: ', error);
-        } else
-            response.send({status: 'success', title: 'Sucesso!', msg: 'Categoria ' + dados.descricao + ' atualizado com sucesso!'});
-    };
-    
-    TiposObjetosDAO.atualizar([dados.id, dados.descricao, dados.ativo], callback);
 };

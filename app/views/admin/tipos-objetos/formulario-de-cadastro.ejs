@@ -1,0 +1,24 @@
+<center><h2>Formulário de <span id="titulo-acao">cadastro</span> categorias</h2></center>
+<form data-role="validator" data-on-submit="return false" data-hint-mode="line">
+    <div class="panel success">
+        <div class="heading">
+            <span class="title">Categoria</span>
+        </div>
+        <label class="block">Nome do categoria:</label>
+        <div class="input-control text" style="width: 100%;">
+            <input type="text"
+                    id="descricao"
+                    value="" 
+                    name="descricao" 
+                    placeholder="Nome da Categoria" 
+                    data-validate-func="required, maxlength"
+                    data-validate-arg=", 30"
+                    data-validate-hint="O campo requerido com limite de 30 caracteres.">
+        </div>
+    </div>
+    <hr>
+    <div class="align-center">
+        <button id="btn-acao" class="button primary"><span id="descricao-btn-acao">Cadastrar</span></button>
+        <a id="btn-cancelar" class="button warning">Cancelar</a>
+    </div>
+</form>

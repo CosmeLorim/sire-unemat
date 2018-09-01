@@ -1,0 +1,39 @@
+<script>
+    function pegarDadosForumularioDisciplinas()
+    {
+        var disciplinaNova = new Disciplina();
+
+        if (!disciplinaNova.validaDescricao($('#descricao').val()))
+            return false;
+        disciplinaNova.descricao = $('#descricao').val();
+
+        if (!disciplinaNova.validaSigla($('#sigla').val()))
+            return false;
+        disciplinaNova.sigla = $('#sigla').val();
+
+        if (!disciplinaNova.validaCargaHoraria($('#cargahoraria').val()))
+            return false;
+        disciplinaNova.carga_horaria = $('#cargahoraria').val();
+
+        disciplinaNova.ativo = $('#ativo').prop('checked');
+        disciplinaNova.semestre = $('#semestre option:selected').val();
+        disciplinaNova.curso = $('#curso option:selected').val();
+        return disciplinaNova;
+    }
+
+    function limpaTelaDisciplinas()
+    {
+        $('#id').val('');
+        $('#descricao').val('');
+        $('#sigla').val('');
+
+        $('#ativo').prop("checked", true);
+        $('#ativo').val(true);
+        $('#inativo').prop("checked", false);
+
+        $('#cargahoraria').val('');
+        $('#semestre').val(1);
+
+        $('#curso').val('');
+    }
+</script>

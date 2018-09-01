@@ -1,0 +1,157 @@
+<script>
+    $('#tabelamanutencao').bootstrapTable({
+        url: "/api/reservas",
+        pageSize: 20,
+        pagination: false,
+        locale: 'pt-BR',
+        pagelist: [10, 100, 250],
+        sidePagination: 'server',
+        onClickRow: function (row) {
+            admin = new Admin();
+            var titulo = 'Cancelamento de reservas';
+            var conteudo = 'Qual reserva deseja cancelar?<br>';
+            
+            <% if(admin){ %>
+
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="mat_aula_1" ' + (row.mat_aula_1 ? '' : "disabled") + '>Matutino aula 01<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="mat_aula_2" ' + (row.mat_aula_2 ? '' : "disabled") + '>Matutino aula 02<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="mat_aula_3" ' + (row.mat_aula_3 ? '' : "disabled") + '>Matutino aula 03<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="mat_aula_4" ' + (row.mat_aula_4 ? '' : "disabled") + '>Matutino aula 04<br>';
+
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="almoco" ' + (row.almoco ? '' : "disabled") + '>Almoço<br>';
+                
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="vesp_aula_1" ' + (row.vesp_aula_1 ? '' : "disabled") + '>Vespertino aula 01<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="vesp_aula_2" ' + (row.vesp_aula_2 ? '' : "disabled") + '>Vespertino aula 02<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="vesp_aula_3" ' + (row.vesp_aula_3 ? '' : "disabled") + '>Vespertino aula 03<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="vesp_aula_4" ' + (row.vesp_aula_4 ? '' : "disabled") + '>Vespertino aula 04<br>';
+
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="janta" ' + (row.janta ? '' : "disabled") + '>Janta<br>';
+                
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="not_aula_1" ' + (row.not_aula_1 ? '' : "disabled") + '>Noturno aula 01<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="not_aula_2" ' + (row.not_aula_2 ? '' : "disabled") + '>Noturno aula 02<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="not_aula_3" ' + (row.not_aula_3 ? '' : "disabled") + '>Noturno aula 03<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="not_aula_4" ' + (row.not_aula_4 ? '' : "disabled") + '>Noturno aula 04<br>';
+
+            <% } else { %>
+                var usuariosDasReservas = {};
+                $.ajax(
+                    {
+                        url: '/api/reservas/usuarios',
+                        type: 'get',
+                        data:
+                        {
+                            objeto: row.objeto,
+                            data: row.data
+                        },
+                        async: false,
+                        success: function(data, status) {
+                            usuariosDasReservas = data.reservas;
+                        }
+                    });
+
+                var usr = JSON.parse(localStorage.getItem('usuario-da-sessao')).usr;
+
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="mat_aula_1" ' + (row.mat_aula_1 && usr === usuariosDasReservas[0].usr ? '' : "disabled") + '>Matutino aula 01<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="mat_aula_2" ' + (row.mat_aula_2 && usr === usuariosDasReservas[1].usr? '' : "disabled") + '>Matutino aula 02<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="mat_aula_3" ' + (row.mat_aula_3 && usr === usuariosDasReservas[2].usr? '' : "disabled") + '>Matutino aula 03<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="mat_aula_4" ' + (row.mat_aula_4 && usr === usuariosDasReservas[3].usr? '' : "disabled") + '>Matutino aula 04<br>';
+
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="almoco" ' + (row.almoco && usr === usuariosDasReservas[4].usr? '' : "disabled") + '>Almoço<br>';
+                
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="vesp_aula_1" ' + (row.vesp_aula_1 && usr === usuariosDasReservas[5].usr? '' : "disabled") + '>Vespertino aula 01<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="vesp_aula_2" ' + (row.vesp_aula_2 && usr === usuariosDasReservas[6].usr? '' : "disabled") + '>Vespertino aula 02<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="vesp_aula_3" ' + (row.vesp_aula_3 && usr === usuariosDasReservas[7].usr? '' : "disabled") + '>Vespertino aula 03<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="vesp_aula_4" ' + (row.vesp_aula_4 && usr === usuariosDasReservas[8].usr? '' : "disabled") + '>Vespertino aula 04<br>';
+
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="janta" ' + (row.janta && usr === usuariosDasReservas[9].usr? '' : "disabled") + '>Janta<br>';
+                
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="not_aula_1" ' + (row.not_aula_1 && usr === usuariosDasReservas[10].usr? '' : "disabled") + '>Noturno aula 01<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="not_aula_2" ' + (row.not_aula_2 && usr === usuariosDasReservas[11].usr? '' : "disabled") + '>Noturno aula 02<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="not_aula_3" ' + (row.not_aula_3 && usr === usuariosDasReservas[12].usr? '' : "disabled") + '>Noturno aula 03<br>';
+                conteudo += '<input type="checkbox" name="horarioCancelamentoReserva" value="not_aula_4" ' + (row.not_aula_4 && usr === usuariosDasReservas[13].usr? '' : "disabled") + '>Noturno aula 04<br>';
+            <% } %>
+                
+            var callback = function ()
+            {
+                var horarioCancelamentoReserva = [];
+                $('input[name="horarioCancelamentoReserva"]').each(function ()
+                {
+                    if ($(this).is(':checked'))
+                        horarioCancelamentoReserva.push($(this).val());
+                });
+
+                if (horarioCancelamentoReserva.length !== 0)
+                {
+                    $.ajax({
+                        url: '/api/reserva',
+                        type: 'delete',
+                        data:
+                            {
+                                horarioCancelamentoReserva: horarioCancelamentoReserva,
+                                data: row.data,
+                                objeto: row.objeto
+                            },
+                        success: function (data, status) {
+                            $.Notify({
+                                caption: data.title,
+                                content: data.msg,
+                                timeout: 10000,
+                                type: data.status
+                            });
+                            if (data.status === 'success') {
+                                var dia = $('input[name="datamanutencao"]').val().slice(0, 2);
+                                var mes = $('input[name="datamanutencao"]').val().slice(3, 5);
+                                var ano = $('input[name="datamanutencao"]').val().slice(6, 10);
+
+                                $("#tabelamanutencao").bootstrapTable('refresh', {
+                                    url: "/api/reservas",
+                                    query:
+                                        {
+                                            dia: dia,
+                                            mes: mes,
+                                            ano: ano
+                                        }
+                                });
+                            }
+                        }
+                    })
+                }
+            };
+
+            admin.dialog(titulo, conteudo, callback);
+        }
+    });
+
+    function atualizarReservas(data)
+    {
+        var tipoObjeto = $('#tipoObjeto option:selected').val();
+
+        data = typeof(data) === 'undefined' ? String($("#reservadata").calendar('getDates')) : data;
+
+        var dia = data.slice(8, 10);
+        var mes = data.slice(5, 7);
+        var ano = data.slice(0, 4);
+        
+        $('#tabelamanutencao').bootstrapTable('refresh', {
+            url: '/api/reservas',
+            query:
+            {
+                dia: dia === '' ? undefined : dia,
+                mes: mes === '' ? undefined : mes,
+                ano: ano === '' ? undefined : ano,
+                tipoObjeto: tipoObjeto === '' ? undefined : tipoObjeto
+            }
+        });
+    }
+
+    function formatadorCelula(val)
+    {
+        return val ? '<span class="mif-cross fg-red"></span>' : '<span class="mif-checkmark fg-blue"></span>';
+    }
+
+    function timesTampParaData(timesTamp)
+    {
+        var data = new Date(timesTamp);
+        return { dia: data.getDate(), mes: data.getMonth() + 1, ano: data.getFullYear() };
+    }
+</script>

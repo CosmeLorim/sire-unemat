@@ -1,0 +1,42 @@
+<script>
+    $('#btnConsultaObjeto').on('click', function ()
+    {
+        $("#gridObjetos").bootstrapTable('refresh', {
+            url: "/api/objetos",
+            query: { txConsulta: $('#txConsultaobjetos').val() }
+        });
+    });
+
+    $("#gridObjetos").bootstrapTable({
+        url: "/api/objetos",
+        pageSize: 10,
+        pagination: true,
+        locale: 'pt-BR',
+        queryParams: function(params){
+            return {
+                limit: params.limit,
+                offset: params.offset,
+                order: params.order,
+                txConsulta: $('#txConsultaobjetos').val()
+            };
+        },
+        pagelist: [8, 14, 21],
+        sidePagination: 'server',
+        columns: [
+            {field: 'objeto.descricao', title: 'Objeto', halign: 'center', width: '45%'},
+            {field: 'tipoObjeto.descricao', title: 'Categoria', width: '45%'}
+        ],
+        onClickRow: function (row) {
+            if(parseInt($('#objetoid').val()) !== row.objeto.id)
+            {
+                $('#objetoselecionado').html('<strong>' + row.objeto.descricao + '-' + row.tipoObjeto.descricao + '</strong>');
+                $('#objetoselecionado').val(row.objeto.descricao + '-' + row.tipoObjeto.descricao);
+                $('#objetoid').val(row.objeto.id);
+            } else {
+                $('#objetoselecionado').html('');
+                $('#objetoselecionado').val('');
+                $('#objetoid').val('');
+            }
+        }
+    });
+</script>

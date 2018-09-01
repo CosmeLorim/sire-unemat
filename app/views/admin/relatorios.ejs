@@ -1,0 +1,88 @@
+<center><h1>Administração de Relatórios</h1></center>
+<div class="container">
+    <div class="grid">
+        <div class="row">
+            <div class="cell colspan2">
+                <blockquote style="padding: .4em; font-size: 1.2em; background-color: #59cde2"><span>Relatório por:</span></blockquote>
+                <label class="input-control radio">
+                    <input type="radio" name="tipo-relatorio" value="objetos"  checked>
+                    <span class="check"></span>
+                    <span class="caption">Objetos</span>
+                </label>
+                <label class="input-control radio">
+                    <input type="radio" name="tipo-relatorio" value="usuarios">
+                    <span class="check"></span>
+                    <span class="caption">Usuários</span>
+                </label>
+                <label class="input-control radio">
+                    <input type="radio" name="tipo-relatorio" value="disciplinas">
+                    <span class="check"></span>
+                    <span class="caption">Disciplinas</span>
+                </label>
+                <blockquote style="padding: .4em; font-size: 1.2em; background-color: #59cde2"><span>Período:</span></blockquote>
+                <div class="cell">
+                    <input type="text" id="periodo-relatorio" value=""/>
+                </div>
+            </div>
+            <div class="cell colspan10">
+                <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                    <input id="campo-consulta" type="text">
+                    <span class="label">Localizar</span>
+                    <span class="informer">Digite o termo da busca</span>
+                    <span class="placeholder">Digite o termo da busca</span>
+                    <button id="btnConsulta" class="button"><span class="mif-search"></span></button>
+                </div>
+                <div id="grid-consulta">
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div id="relatorios">
+                <div>
+                    <table class="table striped border bordered">
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Segunda (01/01/2001)</th>
+                                <th>Terça (02/01/2001)</th>
+                                <th>Quarta (03/01/2001)</th>
+                                <th>Quinta (04/01/2001)</th>
+                                <th>Sexta (05/01/2001)</th>
+                                <th>Sábado (06/01/2001)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Mat. 01</td>
+                                <td>Priscila Waldow - Técnicas Retrospectivas</td>
+                                <td>José Parreira Borges Costa - Eletrotécnica Industrial</td>
+                                <td>Livre</td>
+                                <td>Priscila Waldow - Técnicas Retrospectivas</td>
+                                <td>José Parreira Borges Costa - Eletrotécnica Industrial</td>
+                                <td>Willian Leonardo Vieira Coelho - Engenharia Econômica</td>
+                            </tr>
+                            <tr>
+                                <td>Mat. 02</td>
+                                <td>Priscila Waldow - Técnicas Retrospectivas</td>
+                                <td>José Parreira Borges Costa - Eletrotécnica Industrial</td>
+                                <td>Livre</td>
+                                <td>Priscila Waldow - Técnicas Retrospectivas</td>
+                                <td>José Parreira Borges Costa - Eletrotécnica Industrial</td>
+                                <td>Willian Leonardo Vieira Coelho - Engenharia Econômica</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="7">Relatório Gerado (10/01/2001)</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% include ./relatorios/js/geradorRelatorio %>
+<% include ./relatorios/js/main %>

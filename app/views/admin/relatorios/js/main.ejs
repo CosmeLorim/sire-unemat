@@ -1,0 +1,187 @@
+<script>
+    var ReservaModel = function(data) {
+        this.data = data || 0;
+        this.mat_aula_1 = 'Livre';
+        this.mat_aula_2 = 'Livre';
+        this.mat_aula_3 = 'Livre';
+        this.mat_aula_4 = 'Livre';
+        this.almoco = 'Livre';
+        this.vesp_aula_1 = 'Livre';
+        this.vesp_aula_2 = 'Livre';
+        this.vesp_aula_3 = 'Livre';
+        this.vesp_aula_4 = 'Livre';
+        this.janta = 'Livre';
+        this.not_aula_1 = 'Livre';
+        this.not_aula_2 = 'Livre';
+        this.not_aula_3 = 'Livre';
+        this.not_aula_4 = 'Livre';
+    }
+
+    var ControllerRelatorios = function() {
+        this._elementosVisuais = {
+            tipoRelatorio: $('[name=tipo-relatorio]'),
+            campoConsulta: $('#campo-consulta'),
+            btnConsulta: $('#btnConsulta'),
+            periodoRelatorio: $('#periodo-relatorio'),
+            gridConsulta: $('#grid-consulta')
+        };
+        this._urlApi = { objetos: '/api/objetos/', usuarios: '/api/usuarios/', disciplinas: '/api/disciplinas' }
+        this._tipoConsulta = 'objetos'
+        var it = this;
+
+        this.alterarTipoRelatorio = function(tipo) {
+            tipo = tipo || 'objetos';
+            this._tipoConsulta = tipo;
+            var onClickRow = function(row) {
+                /* tipo, id, dataInicio, DataFim */
+                var id, success;
+                switch (it._tipoConsulta) {
+                    case 'objetos':
+                        id = row.objeto.id;
+
+                        break;
+                
+                    case 'usuarios':
+                        id = row.id;
+
+                        break;
+            
+                    case 'disciplinas':
+                        id = row.disciplina.id;
+
+                        break;
+                
+                    default:
+                        break;
+                }
+
+                var dataInicio =
+                    {
+                        dia: moment(it._elementosVisuais.periodoRelatorio.data('daterangepicker').startDate).format('DD'),
+                        mes: moment(it._elementosVisuais.periodoRelatorio.data('daterangepicker').startDate).format('MM'),
+                        ano: moment(it._elementosVisuais.periodoRelatorio.data('daterangepicker').startDate).format('YYYY')
+                    };
+                var dataFim =
+                    {
+                        dia: moment(it._elementosVisuais.periodoRelatorio.data('daterangepicker').endDate).format('DD'),
+                        mes: moment(it._elementosVisuais.periodoRelatorio.data('daterangepicker').endDate).format('MM'),
+                        ano: moment(it._elementosVisuais.periodoRelatorio.data('daterangepicker').endDate).format('YYYY')
+                    }
+                
+                var success = function(data) {
+                    var relatoriosOriginais = data.relatorio;
+                    var dataEHoraRelatorio = data.dataEHora;
+
+                    if(!relatoriosOriginais.length){
+                        console.log('Sem dados para gerar relatórios...');
+                        return;
+                    }
+
+                    var relatoriosFormatados = function() {
+                        var relat = [];
+                        relat.push(new ReservaModel(relatoriosOriginais[0].reserva.data));
+                        
+                        for(var i = 0; i < relatoriosOriginais.length; i++) {
+                            var reserva = relatoriosOriginais[i].reserva;
+                            var oferecimento = relatoriosOriginais[i].oferecimento;
+
+                            if(relat[relat.length -1].data !== reserva.data) {
+                                relat.push(new ReservaModel(reserva.data));
+                            }
+
+                            for(atributo in new ReservaModel) {
+                                if(reserva[atributo] === true) {
+                                    relat[relat.length -1][atributo] = '<span class="text-destaque">' + oferecimento.usuario + '</span> - ' + oferecimento.disciplina;
+                                }
+                            }
+                        }
+
+                        return relat;
+                    }();
+
+                    GerarRelatorio({ relatorios: relatoriosFormatados, dataEHoraRelatorio })
+                };
+
+                $.ajax({
+                    url: '/api/relatorios/' + it._tipoConsulta,
+                    type: 'get',
+                    data: { id: id, dataInicio: dataInicio, dataFim: dataFim },
+                    success: success
+                })
+            };
+
+            this._elementosVisuais.gridConsulta.bootstrapTable('destroy');
+            Grid({ onClickRow: onClickRow, grid: this._elementosVisuais.gridConsulta, preConfig: this._tipoConsulta });
+
+            $("tbody").on("click", "tr", function (e) {
+                $(this).toggleClass("selected").siblings(".selected").removeClass("selected");
+            });
+        }
+        this.alterarTipoRelatorio()
+
+        this._elementosVisuais.periodoRelatorio.daterangepicker({
+            "timePicker": false,
+            "opens": "rigth",
+            "drops": "down",
+            "locale": {
+                format: 'DD/MM/YYYY',
+                "separator": " | até | ",
+                "applyLabel": "Aplicar",
+                "cancelLabel": "Cancelar",
+                "fromLabel": "de",
+                "toLabel": "para",
+                "customRangeLabel": "Personalizado",
+                "daysOfWeek": [
+                    "Dom",
+                    "Seg",
+                    "Ter",
+                    "Qua",
+                    "Qui",
+                    "Sex",
+                    "Sab"
+                ],
+                "monthNames": [
+                    "Janeiro",
+                    "Fevereiro",
+                    "Março",
+                    "Abril",
+                    "Maio",
+                    "junho",
+                    "Julho",
+                    "Agosto",
+                    "Setembro",
+                    "Outubro",
+                    "Novembro",
+                    "Dezembro"
+                ],
+                "firstDay": 1
+            },
+            "startDate": moment(),
+            "endDate": moment().add(1, 'M')
+        });
+
+        this._elementosVisuais.tipoRelatorio.change(function() {
+            var tipoObjetoSelecionado = $('input[name=tipo-relatorio]:checked').val();
+            it._elementosVisuais.campoConsulta.val('');            
+            it.alterarTipoRelatorio(tipoObjetoSelecionado);
+        })
+
+        this.atualizaGrid = function () {
+            it._elementosVisuais.gridConsulta.bootstrapTable('refresh', {
+                url: it._urlApi[it._tipoConsulta],
+                query: { txConsulta: it._elementosVisuais.campoConsulta.val() }
+            });
+        }
+
+        this._elementosVisuais.campoConsulta.keypress(function(event){
+            if(event.key === 'Enter')
+                it.atualizaGrid();
+        });
+
+        this._elementosVisuais.btnConsulta.on('click', function() {
+            it.atualizaGrid();
+        })
+    }
+
+    var controllerRelatorios = new ControllerRelatorios();
+</script>

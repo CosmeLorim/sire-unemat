@@ -1,0 +1,35 @@
+<center><h2>Formulário de <span id="titulo-acao">cadastro</span> cursos</h2></center>
+<form data-role="validator" data-on-submit="return false" data-hint-mode="line">
+    <div class="panel success">
+        <div class="heading">
+            <span class="title">Curso</span>
+        </div>
+        <div class="row">
+            <div class="cell colspan12">
+                <label class="block">Nome do curso:</label>
+                <div class="input-control text" style="width: 100%;">
+                    <input type="text" id="descricao" value="" name="descricao" placeholder="Nome do Curso"
+                            data-validate-func="required, maxlength"
+                            data-validate-arg=", 120"
+                            data-validate-hint="O campo requerido com limite de 120 caracteres.">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="cell">
+                <label class="block">Sigla do curso:</label>
+                <div class="input-control text" style="width: 100%;">
+                    <input type="text" id="sigla" value=""  name="sigla" placeholder="Sigla do curso"
+                    data-validate-func="required, maxlength"
+                    data-validate-arg=", 10"
+                    data-validate-hint="O campo requerido com limite de 10 caracteres.">
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="align-center">
+        <button id="btn-acao" class="button primary"><span id="descricao-btn-acao">Cadastrar</span></button>
+        <a id="btn-cancelar" class="button warning">Cancelar</a>
+    </div>
+</form>

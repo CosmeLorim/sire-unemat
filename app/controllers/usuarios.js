@@ -1,273 +1,232 @@
-/*              RECUPERAÇÃO DE USUÁRIOS                              */
-module.exports.recuperarTodos = (application, request, response) =>
+/**
+ * Trata erros de chamadas assíncronas.
+ * 
+ * @param {String} error
+ */
+const tratativaErrosConsultas = (error, response) =>
 {
-    const txConsulta = request.query.txconsulta === undefined ? '' : request.query.txconsulta;
+    console.error(error);
+    response.send({ status: "alert", title: "Erro!", msg: "Erro no servidor." });
+}
 
-    const adcionais = {
+/**
+ * Responde os dados de um intervalo de usuarios conforme os dados oriundos da requisição
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response
+ */
+module.exports.buscar = async (application, request, response) =>
+{
+    if(typeof(request.query.limit) === "undefined" || typeof(request.query.offset) === "undefined")
+    {
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+
+    const dadosReq =
+    {
+        txConsulta: typeof(request.query.txConsulta) === "undefined" ? "%" : `%${request.query.txConsulta}%`,
         limit: request.query.limit,
-        offset: request.query.offset,
-        txConsulta: '%' + txConsulta + '%'
+        offset: request.query.offset
     };
-
-    const callback = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro na recuperação dos usuários: ', error);
-        } else
-        {
-            const count = results.rows[results.rows.length -1].count;
-            results.rows.pop();
-            
-            response.send(JSON.stringify(
-                    {
-                        total: count,
-                        rows: results.rows
-                    }
-            ));
-        }
-    };
-
-    const connection = application.config.dbConnection;
-    const UsuariosDAO = new application.app.models.UsuariosDAO(connection);
-    UsuariosDAO.buscaIntervalo(adcionais, callback);
-};
-
-/*              RECUPERAÇÃO DE USUÁRIOS                              */
-module.exports.recuperarUm = (application, request, response) =>
-{
-    const dadosForm = request.body;
-    const connection = application.config.dbConnection;
-    const PerfisDAO = new application.app.models.PerfisDAO(connection);
-
-    const callback = (error, results) =>
-    {
-        if (error)
-        {
-            console.log('Erro ao recuperar um usuário');
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-        } else
-        {
-            response.send(JSON.stringify(results.rows));
-        }
-    };
-    PerfisDAO.buscarPorUsuario(dadosForm.id, callback);
-};
-
-module.exports.administrar = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRotaAdminNaoAutenticado(application, request, response);
-        return;
-    }
     
-    const connection = application.config.dbConnection;
-    let TiposObjetosDAO = new application.app.models.TiposObjetosDAO(connection);
+    const UsuariosDAO = new application.app.models.UsuariosDAO(application.config.dbConnection);
 
-    let callback = (error, results) =>
-    {
-        if (error)
-        {
-            console.log('Erro ao abrir tela administrativa.');
-            response.send(error);
-        }
-        else
-        {
-            let dados =
-                    {
-                        tiposObjetos: results.rows
-                    };
-            response.render('admin/usuarios', {dados: dados});
-        }
-    };
-
-    TiposObjetosDAO.buscarTodos(callback);
-};
-/*              CADASTRO DE USUÁRIOS                                */
-module.exports.inserir = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRequisicoesNaoAutenticadas(application, request, response);
-        return;
-    }
-    
-    const dados = request.body;
-    const callbackVerificacaoUsuario = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro na verificação de usuario: ', error);
-        } else
-        {
-            if (results.rowCount === 0)
-                UsuariosDAO.inserir([
-                    dados.usuario.nome,
-                    dados.usuario.usr,
-                    dados.usuario.passwd,
-                    dados.usuario.admin,
-                    dados.usuario.ativo
-                ], callbackInsercao);
-            else
-                response.send({status: 'alert', title: 'Erro!', msg: 'Usuário já existe no banco.'});
-        }
-    };
-    const callbackInsercao = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro no cadastro de usuario: ', error);
-        } else
-        {
-            UsuariosDAO.buscarPorUsr(dados.usuario.usr, callbackBuscaUsuario);
-        }
-    };
-    const callbackBuscaUsuario = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro na busca do usuário', error);
-        } else
-        {
-            let tiposObjetos = [];
-            const usuario = results.rows[0].id;
-
-            if (dados.perfil !== undefined)
+    try {
+        const buscaUsuarios = await UsuariosDAO.buscaIntervalo(
             {
-                dados.perfil.forEach((perfil) =>
-                {
-                    if (perfil.ativo === 'true')
-                        tiposObjetos.push(perfil.tipo_objeto);
-                });
-
-                const PerfisDAO = new application.app.models.PerfisDAO(connection);
-                PerfisDAO.inserir(tiposObjetos, usuario, callbackCriaPerfil);
-            } else
-                response.send({status: 'success', title: 'Sucesso!', msg: 'Usuário cadastrado com sucesso!'});
-        }
-    };
-    const callbackCriaPerfil = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro na criação do perfil', error);
-        } else
-        {
-            response.send({status: 'success', title: 'Sucesso!', msg: 'Usuário cadastrado com sucesso!'});
-        }
-    };
-    const connection = application.config.dbConnection;
-    const UsuariosDAO = new application.app.models.UsuariosDAO(connection);
-
-    UsuariosDAO.buscarPorUsr(dados.usuario.usr, callbackVerificacaoUsuario);
-};
-/*              ATUALIZAÇÃO DE USUÁRIOS                              */
-module.exports.atualizar = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRequisicoesNaoAutenticadas(application, request, response);
-        return;
-    }
-    
-    const dadosForm = request.body;
-
-    const callbackAtualizacaoUzuario = (error, results) =>
-    {
-        if (error)
-        {
-            console.log('Erro ao atualizar usuário:', error);
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-        } else
-        {
-            PerfisDAO.verificar(dadosForm.usuario.id, callbackVerificaPerfil);
-        }
-    };
-    const callbackVerificaPerfil = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro ao verificar perfil:', error);
-        } else
-        {
-            let perfilAtualizado = [], perfilNovo = [], encontrou;
-
-            dadosForm.perfil.forEach((perfil) =>
-            {
-                encontrou = false;
-                results.rows.forEach((row) =>
-                {
-                    if (perfil.tipo_objeto == row.tipo_objeto)
-                    {
-                        perfilAtualizado.push({
-                            id: row.id,
-                            usuario: dadosForm.usuario.id,
-                            tipo_objeto: perfil.tipo_objeto,
-                            ativo: perfil.ativo
-                        });
-                        encontrou = true;
-                        return;
-                    }
-                });
-                if ((!encontrou) && (perfil.ativo == 'true'))
-                    perfilNovo.push(perfil.tipo_objeto);
+                order: dadosReq.order,
+                limit: dadosReq.limit,
+                offset: dadosReq.offset,
+                txConsulta: dadosReq.txConsulta
             });
-            dadosForm.perfilNovo = perfilNovo;
-            PerfisDAO.atualizar(perfilAtualizado, callbackAtualizacaoPerfil);
-        }
-    };
-    const callbackAtualizacaoPerfil = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro ao atualizar perfil:', error);
-        } else
-        {
-            const perfilNovo = dadosForm.perfilNovo;
-            const usuario = dadosForm.usuario.id;
-            PerfisDAO.inserir(perfilNovo, usuario, callbackCriaPerfil);
-        }
-    };
-    const callbackCriaPerfil = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro ao atualizar perfil:', error);
-        } else
-        {
-            response.send({status: 'success', title: 'Sucesso!', msg: 'Usuário atualizado com sucesso!'});
-        }
-    };
-    const connection = application.config.dbConnection;
-    const PerfisDAO = new application.app.models.PerfisDAO(connection);
-    const UsuariosDAO = new application.app.models.UsuariosDAO(connection);
 
-    if (dadosForm.usuario.passwd === "")
-        UsuariosDAO.atualizarSemSenha(
-                dadosForm.usuario.admin,
-                dadosForm.usuario.ativo,
-                dadosForm.usuario.id,
-                dadosForm.usuario.nome,
-                dadosForm.usuario.usr,
-                callbackAtualizacaoUzuario
-                );
-    else
-        UsuariosDAO.atualizarTudo(
-                dadosForm.usuario.admin,
-                dadosForm.usuario.ativo,
-                dadosForm.usuario.id,
-                dadosForm.usuario.nome,
-                dadosForm.usuario.passwd,
-                dadosForm.usuario.usr,
-                callbackAtualizacaoUzuario
-                );
+        const count = buscaUsuarios.pop().count;
+        
+        response.send(JSON.stringify({ total: count, rows: buscaUsuarios }));
+    } catch (error) {
+        tratativaErrosConsultas(error);
+    }
+};
+
+/**
+ * Recupera o perfil do usuário
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.buscarUm = async (application, request, response) =>
+{
+    if(typeof(request.params.id) === "undefined")
+    {
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+    
+    const dadosReq = { id: request.params.id };
+    
+    const UsuariosDAO = new application.app.models.UsuariosDAO(application.config.dbConnection);
+
+    try {
+        const buscaUsuarios = await UsuariosDAO.buscarPerfisPorUsuario({ id: dadosReq.id });
+
+        const usuariosFormatados = buscaUsuarios.map(us => { return { id: us.id, ativo: us.ativo, tipoObjeto: us.tipo_objeto, usuario: us.usuario } });
+
+        response.send(JSON.stringify(usuariosFormatados));
+    } catch (error) {
+        tratativaErrosConsultas(error);
+    }
+};
+
+/**
+ * Responde a particula de administração de usuário
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.administrar = async (application, request, response) =>
+{
+    const UsuariosDAO = new application.app.models.UsuariosDAO(application.config.dbConnection);
+
+    try {
+        const buscaTiposObjetos = await UsuariosDAO.buscarTodosTiposObjetos();
+
+        response.render("admin/usuarios", { tiposObjetos: buscaTiposObjetos });
+    } catch (error) {
+        tratativaErrosConsultas(error);
+    }
+};
+
+/**
+ * Cadastra um novo usuário
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.inserir = async (application, request, response) =>
+{
+    if(typeof(request.body.usr)   === "undefined" || typeof(request.body.nome)  === "undefined" || typeof(request.body.passwd) === "undefined" ||
+       typeof(request.body.admin) === "undefined")
+    {
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+
+    const dadosReq = 
+    {
+        usr: request.body.usr,
+        nome: request.body.nome,
+        passwd: request.body.passwd,
+        admin: JSON.parse(request.body.admin),
+        perfil: request.body.perfil.map(
+            perfil => { return { tipoObjeto: parseInt(perfil.tipoObjeto), ativo: JSON.parse(perfil.ativo) } })
+    };
+
+    const UsuariosDAO = new application.app.models.UsuariosDAO(application.config.dbConnection);
+
+    try {
+        const verificaUnicidade = await UsuariosDAO.verificarSeExiste({ usr: dadosReq.usr });
+
+        if (verificaUnicidade[0].existe && dadosReq.usr !== '99999999999')
+        {
+            response.send({ status: "warning", title: "Erro!", msg: "Usuário já existe no banco." });
+            return;
+        }
+        
+        const idUsuarioCriado = await UsuariosDAO.inserir({ nome: dadosReq.nome, usr: dadosReq.usr, passwd: dadosReq.passwd, admin: dadosReq.admin });
+
+        const tiposObjetos = dadosReq.perfil.filter(
+            perfil => perfil.ativo).map(
+                perfil => perfil.tipoObjeto);
+                
+        if (tiposObjetos.length === 0)
+        {
+            response.send({ status: "success", title: "Sucesso!", msg: "Usuário cadastrado com sucesso!" });
+            return;
+        }
+
+        await UsuariosDAO.inserirPerfis({ tiposObjetos: tiposObjetos, usuario: idUsuarioCriado[0].id });
+
+        response.send({ status: "success", title: "Sucesso!", msg: "Usuário cadastrado com sucesso!" });
+    } catch (error) {
+        tratativaErrosConsultas(error);
+    }
+};
+
+/**
+ * Atualiza um usuário no banco de dados
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.atualizar = async (application, request, response) =>
+{
+    if(typeof request.params.usr === 'undefined')
+    {
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+
+    const dadosReq = 
+    {
+        usr: request.params.usr,
+        nome: request.body.nome,
+        passwd: request.body.passwd,
+        primeiro_login: request.body.primeiroLogin,
+        admin: request.body.admin ? JSON.parse(request.body.admin) : request.body.admin,
+        perfil: request.body.perfil
+            ? request.body.perfil.map(perfil => { return { tipoObjeto: parseInt(perfil.tipoObjeto), ativo: JSON.parse(perfil.ativo) } })
+            : request.body.perfil
+    };
+    
+    const UsuariosDAO = new application.app.models.UsuariosDAO(application.config.dbConnection);
+
+    try {
+        const listaAtualizacoes = [];
+        const dadosOriginais = await UsuariosDAO.buscarUsuarioPorUsr({ usr: dadosReq.usr });
+
+        /* Filtra os atributos que o requisitante deseja atualizar */
+        const atributosParaAtualizar = [];
+        for(atributo in dadosOriginais[0])
+        {
+            if(dadosOriginais[0][atributo] !== dadosReq[atributo] && typeof dadosReq[atributo] !== 'undefined')
+                atributosParaAtualizar.push({ chave: atributo, valor: dadosReq[atributo] });
+        }
+        
+        if(atributosParaAtualizar.length)
+            listaAtualizacoes.push(UsuariosDAO.atualizar({ atributos: atributosParaAtualizar, id: dadosOriginais[0].id }));
+
+        if(dadosReq.perfil)
+        {
+            const perfisUsuario = await UsuariosDAO.buscarPerfisPorUsuario({ id: dadosOriginais[0].id });
+
+            /* Captura os perfis para atualizar e monta na estrutura correta para atualização */
+            const perfisParaAtualizar = perfisUsuario.filter(
+                row => dadosReq.perfil.some(
+                    perfil => perfil.tipoObjeto === row.tipo_objeto && perfil.ativo !== row.ativo
+                )
+            ).map(array => { return { id: array.id, ativo: !array.ativo } });
+
+            if(perfisParaAtualizar.length !== 0)
+                listaAtualizacoes.push(UsuariosDAO.alternarPerfis({ perfis: perfisParaAtualizar }));
+                
+            /* Encontra perfis para criar e monta na estrutura correta para cadastro */
+            const perfisParaCriar = dadosReq.perfil.filter(
+                perfil => (perfisUsuario.length === 0 && (!perfil.ativo)) ? false : perfisUsuario.every(
+                    row => perfil.tipoObjeto !== row.tipo_objeto && perfil.ativo)).map(array => array.tipoObjeto);
+
+            if(perfisParaCriar.length !== 0)
+                listaAtualizacoes.push(UsuariosDAO.inserirPerfis({ tiposObjetos: perfisParaCriar, usuario: dadosOriginais[0].id }));
+        }
+
+        await Promise.all(listaAtualizacoes);
+        response.send({ status: "success", title: "Sucesso!", msg: "Usuário atualizado com sucesso!" });
+    } catch (error) {
+        tratativaErrosConsultas(error, response);
+    }
 };

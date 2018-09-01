@@ -1,0 +1,135 @@
+<script>
+    var ControllerCursos = function (){
+        this._elementosVisuais = {
+                tituloAcao: $('#titulo-acao'),
+                btnAcao: $('#btn-acao'),
+                descricaoBtnAcao: $('#descricao-btn-acao'),
+                btnCancelar: $('#btn-cancelar'),
+                btnConsulta: $('#btnConsulta'),
+                campoConsulta: $('#campo-consulta'),
+                grid: $("#grid-cursos")
+            }
+        this._estado = 'cadastro';
+        this._dados = { id: 0, descricao: '', sigla: '' };
+        this._formulario = { descricao: $('#descricao'), sigla: $('#sigla') };
+        this._urlBase = '/api/cursos/';
+        var it = this;
+
+        this.alternarEstado = function(estado, row) {
+            switch(estado){
+                case 'alteracao':
+                    it._elementosVisuais.tituloAcao.html('alteração');
+                    it._elementosVisuais.descricaoBtnAcao.html('Alterar');
+                    it._formulario.descricao.val(row.curso.descricao);
+                    it._formulario.sigla.val(row.curso.sigla);
+                    it._estado = 'alteracao';
+                    it._dados = { id: row.curso.id, descricao: row.curso.descricao, sigla: row.curso.sigla };
+                    break;
+                case 'cadastro':
+                    it._elementosVisuais.tituloAcao.html('cadastro');
+                    it._elementosVisuais.descricaoBtnAcao.html('Cadastrar');
+                    $('#grid-cursos tr').removeClass('selected')
+                    it._formulario.descricao.val('');
+                    it._formulario.sigla.val('');
+                    it._estado = 'cadastro';
+                    it._dados = { id: 0, descricao: '', sigla: '' };
+                    break;
+                default:
+                    console.error('Valor inválido para alteração de estado');
+                    break;
+            }
+        }
+
+        this._elementosVisuais.btnAcao.on('click', function() {
+            var curso = { descricao: it._formulario.descricao.val(), sigla: it._formulario.sigla.val() };
+            
+            if(curso.descricao.length === 0 || curso.descricao.length > 120 || curso.sigla.length === 0 || curso.sigla.length > 10)
+                return;
+                
+            var success = function (data, status) {
+                $.Notify({ caption: data.title, content: data.msg, timeout: 10000, type: data.status });
+                
+                if (data.status === 'success') {
+                    it.atualizaGrid();
+                    it.alternarEstado('cadastro');
+                }
+            };
+
+            switch (it._estado) {
+                case 'cadastro':
+                    $.ajax({
+                        url: it._urlBase,
+                        type: 'post',
+                        data: { curso },
+                        success: success
+                    })                    
+                    break;
+                case 'alteracao':
+                    $.ajax({
+                        url: it._urlBase + it._dados.id,
+                        type: 'put',
+                        data: { curso },
+                        success: success
+                    })
+                    break;
+                default:
+                    $.Notify({ caption: 'Erro na página.', content: 'Estado da página incorreto', timeout: 5000, type: 'alert' });
+                    console.error('Estado do controller do tipo "ControllerCursos" incorreto.');
+                    break;
+            }
+        });
+
+        this._elementosVisuais.btnCancelar.on('click', function(){
+            it.alternarEstado('cadastro');
+        });
+
+        this._elementosVisuais.btnConsulta.on('click', function () {
+            it.atualizaGrid();
+        });
+
+        this._elementosVisuais.grid.bootstrapTable({
+            url: it._urlBase,
+            pageSize: 10,
+            pagination: true,
+            locale: 'pt-BR',
+            queryParams: function(params){
+                return {
+                    limit: params.limit,
+                    offset: params.offset,
+                    order: params.order,
+                    txConsulta: it._elementosVisuais.campoConsulta.val()
+                };
+            },
+            sidePagination: 'server',
+            columns: [
+                { field: 'curso.descricao', title: 'Cursos', width: '85%' },
+                { field: 'curso.sigla', title: 'Sigla', width: '15%' }
+            ],
+            onClickRow: function (row) {
+                var novoEstado = it._dados.id === row.curso.id ? 'cadastro' : 'alteracao';
+                it.alternarEstado(novoEstado, row)
+            }
+        });
+
+        this.atualizaGrid = function () {
+            it._elementosVisuais.grid.bootstrapTable('refresh', {
+                url: it._urlBase,
+                query: { txConsulta: this._elementosVisuais.campoConsulta.val() }
+            });
+        }
+
+        this._elementosVisuais.campoConsulta.keypress(function(event){
+            if(event.key === 'Enter')
+                it.atualizaGrid();
+        });
+    }
+    
+    var controllerCurso = new ControllerCursos();
+
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+        .toggleClass("selected")
+        .siblings(".selected")
+        .removeClass("selected");
+    });
+</script>

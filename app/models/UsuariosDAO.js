@@ -1,151 +1,252 @@
-UsuariosDAO = function (connection)
+/**
+ * Classe DAO referente ao controller "usuarios".
+ * 
+ * @class UsuariosDAO
+ */
+class UsuariosDAO
 {
-    this._pool = connection;
-    this._tabela = 'usuarios';
-    
-    /*
-     * Faz busca de um intervalo de usuários e retorna a row deles no banco
-     * @param {txConsulta: char[], limit: integer, offset: integer} dados
-     * @param {function} callback
-     * @returns {undefined}
+    /**
+     * Cria uma instância de UsuariosDAO.
+     * 
+     * @param {ConnectionConfig} connection 
+     * @memberof UsuariosDAO
      */
-    this.buscaIntervalo = (dados, callback) =>
+    constructor(connection)
     {
-        const text =
-                `SELECT 
-                    u.id AS id, u.nome AS nome, u.usr AS usr, u.ativo AS ativo, u.admin AS admin
-                FROM
-                    ${this._tabela} u
-                WHERE
-                    nome ILIKE \'${dados.txConsulta}\'
-                ORDER BY
-                    nome
-                LIMIT
-                    ${dados.limit}
-                OFFSET
-                    ${dados.offset};
-                SELECT 
-                    COUNT(u.id)
-                FROM
-                    ${this._tabela} u
-                WHERE
-                    nome ILIKE \'${dados.txConsulta}\';`;
-//        console.log(text);
-        this._pool.query(text, callback);
-    };
-    /*
-     * Faz busca de usuário por 'usr' e retorna um a row dele no banco
-     * @param {integer} id
-     * @param {function} callback
-     * @returns {undefined}
-     */
-    this.buscarPorUsr = (usr, callback) =>
-    {
-        const text = `SELECT
-                        *
-                    FROM
-                        ${this._tabela}
-                    WHERE
-                        usr ILIKE \'${usr}\'
-                    LIMIT
-                        1;`;
-        this._pool.query(text, callback);
-    };
-    
-    /*
-     * Faz busca de usuário por ID e retorna um a row dele no banco
-     * @param {integer} id
-     * @param {function} callback
-     * @returns {undefined}
-     */
-    this.buscarPorId = (id, callback) =>
-    {
-        const text = `SELECT
-                        *
-                    FROM
-                        ${this._tabela}
-                    WHERE
-                        usr ILIKE \'${id}\'
-                    LIMIT
-                        1;`;
-        this._pool.query(text, callback);
-    };
+        this._pool = connection;
+    }
 
-    /*
-     * Faz busca de todos os usuários ativos no banco e retorna um a row dele no banco 
-     * @param {function} callback
-     * @returns {undefined}
+    /**
+     * Recupera um intervalo de usuários.
+     * 
+     * @param {Object} dados 
+     * @param {String} dados.txConsulta
+     * @param {Number} dados.offset
+     * @param {Number} dados.limit
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
      */
-    this.buscaTodosAtivo = (callback) =>
+    buscaIntervalo(dados)
     {
-        const text =
-                `SELECT 
-                    u.id AS id, u.nome AS nome, u.usr AS usr, u.ativo AS ativo, u.admin AS admin
-                FROM
-                    ${this._tabela} u
-                WHERE
-                    ativo = true
-                ORDER BY
-                    nome;`;
+        const text = `SELECT  `+
+                        `id, nome, usr, admin `+
+                    `FROM `+
+                        `usuarios u `+
+                    `WHERE `+
+                        `nome ILIKE '${dados.txConsulta}' `+
+                    `OR `+
+                        `usr ILIKE '${dados.txConsulta}' `+
+                    `ORDER BY `+
+                        `nome `+
+                    `LIMIT `+
+                        `${dados.limit} `+
+                    `OFFSET `+
+                        `${dados.offset}; `+
+                    `SELECT  `+
+                        `COUNT(0) `+
+                    `FROM `+
+                        `usuarios u `+
+                    `WHERE `+
+                        `nome ILIKE '${dados.txConsulta}';`;
+        // console.log(text);
 
-        this._pool.query(text, callback);
-    };
-    
-    /*         FUNÇÃO PARA INSERIR UM NOVO OBJETO NO BANCO                      */
-    /*  A FUNÇÃO ESPERA UM ARRAY COM TRÊS VALORES: DESCRICAO COM 30 CARACTERES  */
-    /*       NO MÁXIMO, UM BOOLEAN PARA ATIVO E A REFERENCIA                    */
-    /*                   PARA O TIPO DO OBJETO                                  */
-    /*          ['DESCRICAO', 'ATIVO', 'TIPO_OBJETO']                           */
-    this.inserir = (values, callback) =>
-    {
-        const text = `INSERT INTO ${this._tabela} (nome, usr, passwd, admin, ativo) VALUES ($1, $2, $3, $4, $5);`;
-        this._pool.query(text, values, callback);
-    };
+        return this._query(text, 'application.app.models.UsuariosDAO.buscaIntervalo');
+    }
 
-    /*
-     * Atualiza um usuário com base no ID
-     * @param {boolean} admin
-     * @param {boolean} ativo
-     * @param {integer} id
-     * @param {char} nome
-     * @param {char} passwd
-     * @param {char} usr
-     * @param {function} callback
-     * @returns {undefined}
+    /**
+     * Recupera perfis de um usuarios.
+     * Busca por: usuario.usuario.
+     * 
+     * @param {Object} dados 
+     * @param {Number} dados.id
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
      */
-    this.atualizarTudo = (admin, ativo, id, nome, passwd, usr, callback) =>
+    buscarPerfisPorUsuario(dados)
     {
-        const text = `UPDATE 
-                        ${this._tabela}
-                      SET  
-                        admin = ${admin}, ativo = ${ativo}, nome = \'${nome}\', passwd = \'${passwd}\', usr = \'${usr}\'
-                      WHERE
-                        ID = ${id};`;
-//        console.log(text);
-        this._pool.query(text, callback);
-    };
-    
-        /*
-     * Atualiza Usuário com base no ID
-     * @param {boolean} admin
-     * @param {boolean} ativo
-     * @param {integer} id
-     * @param {char} nome
-     * @param {char} passwd
-     * @param {char} usr
-     * @param {function} callback
-     * @returns {undefined}
+        const text = `SELECT id, ativo, tipo_objeto, usuario FROM perfis WHERE usuario = ${dados.id};`;
+        // console.log(text);
+
+        return this._query(text, 'application.app.models.UsuariosDAO.buscarPerfisPorUsuario');
+    }
+
+    /**
+     * Verifica conflito de usr.
+     * Busca por: usuario.usr.
+     * 
+     * @param {Object} dados
+     * @param {Number} dados.id
+     * @param {String} dados.usr
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
      */
-    this.atualizarSemSenha = (admin, ativo, id, nome, usr, callback) =>
+    verificarSeExiste(dados)
     {
-        const text = `UPDATE 
-                        ${this._tabela}
-                      SET  
-                        admin = ${admin}, ativo = ${ativo}, nome = \'${nome}\', usr = \'${usr}\'
-                      WHERE
-                        ID = ${id};`;
-//        console.log(text);
-        this._pool.query(text, callback);
-    };
-};
+        const text = typeof(dados.id) === 'undefined' ?
+        `SELECT (SELECT COUNT(0) FROM usuarios WHERE usr ILIKE '${dados.usr}' LIMIT 1) > 0 AS existe;`
+        : `SELECT (SELECT COUNT(0) FROM usuarios WHERE usr ILIKE '${dados.usr}' AND id <> ${dados.id} LIMIT 1) > 0 AS existe;`;
+        // console.log(text);
+        
+        return this._query(text, 'application.app.models.UsuariosDAO.verificarSeExiste');
+    }
+
+    /**
+     * Busca dos dados necessários do usuário para autenticação e criação da sessão.
+     * Busca por: usuarios.usr
+     * 
+     * @param {Object} dados 
+     * @param {String} dados.usr
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
+     */
+    buscarUsuarioPorUsr(dados, callback)
+    {
+        const text = `SELECT id, nome, usr, passwd, admin, primeiro_login FROM usuarios WHERE usr ILIKE '${dados.usr}' LIMIT 1;`;
+        // console.log(text);
+        
+        return this._query(text, 'application.app.models.AutenticacaoDAO.buscarUsuarioPorUsr');
+    }
+
+    /**
+     * Recupera perfis.
+     * Busca por: perfis.usuario.
+     * 
+     * @param {Number} dados.usuario
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
+     */
+    buscaPerfis(dados)
+    {
+        const text = `SELECT * FROM perfis WHERE usuario = ${dados.usuario};`;
+        // console.log(text);
+
+        return this._query(text, 'application.app.models.UsuariosDAO.buscaPerfis');
+    }
+
+    /**
+     * Recupera todos os tipos_objeto do banco.
+     * 
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
+     */
+    buscarTodosTiposObjetos()
+    {
+        const text = `SELECT id, descricao FROM tipos_objeto;`;
+
+        return this._query(text, 'application.app.models.UsuariosDAO.buscarTodosTiposObjetos');
+    }
+
+    /**
+     * Insere um novo usuario no banco.
+     * 
+     * @param {Object} dados 
+     * @param {String} dados.nome 
+     * @param {String} dados.usr 
+     * @param {Number} dados.passwd 
+     * @param {Boolean} dados.admin 
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
+     */
+    inserir(dados)
+    {
+        const text = `INSERT INTO `+
+                        `usuarios (nome, usr, passwd, admin) `+
+                    `VALUES `+
+                        `('${dados.nome}', '${dados.usr}', '${dados.passwd}', ${dados.admin}) `+
+                    `RETURNING id;`;
+        // console.log(text);
+
+        return this._query(text, 'application.app.models.UsuariosDAO.inserir');
+    }
+
+    /**
+     * Insere novos perfis.
+     * 
+     * @param {Object} dados 
+     * @param {Number[]} dados.tiposObjetos
+     * @param {Number} dados.usuario
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
+     */
+    inserirPerfis(dados)
+    {
+        const text = dados.tiposObjetos.map(tipoObjeto => `INSERT INTO perfis (tipo_objeto, usuario) VALUES (${tipoObjeto}, ${dados.usuario});\n`).join('');
+        // console.log(text);
+
+        return this._query(text, 'application.app.models.UsuariosDAO.inserirPerfis');
+    }
+
+    /**
+     * Atualiza todos os atritutos de um usuário.
+     * Busca por: usuario.id.
+     * 
+     * @param {Object} dados 
+     * @param {Object[]} dados.atributos
+     * @param {String} dados.atributos.chave
+     * @param {String} dados.atributos.valor
+     * @param {Number} dados.id
+     * @param {Boolean} dados.admin
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
+     */
+    atualizar(dados)
+    {
+        const atributos = dados.atributos.map(atb => `${atb.chave} = ${typeof atb.valor === 'string' ? `'${atb.valor}'` : atb.valor}`).join(', ');
+
+        const text = `UPDATE `+
+                        `usuarios `+
+                    `SET `+
+                        `${atributos} `+
+                    `WHERE `+
+                        `id = ${dados.id};`;
+        // console.log(text);
+
+        return this._query(text, 'application.app.models.UsuariosDAO.atualizar');
+    }
+
+    /**
+     * Reativa perfis.
+     * Busca por: perfis.id.
+     * 
+     * @param {Object} dados 
+     * @param {Object[]} dados.perfis
+     * @param {Number} dados.perfis.id
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
+     */
+    alternarPerfis(dados)
+    {
+        const text = dados.perfis.map(perfil => `UPDATE perfis SET ativo = ${perfil.ativo} WHERE id = ${perfil.id};\n`).join('');
+        // console.log(text);
+
+        return this._query(text, 'application.app.models.UsuariosDAO.alternarPerfis');
+    } 
+
+    /**
+     * Metodo interno para execução da query.
+     * 
+     * @param {Object} dados 
+     * @param {String} dados.sql 
+     * @param {String} dados.metodo
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof UsuariosDAO
+     */
+    _query(sql, metodo)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            this._pool.query(sql, (error, results) =>
+            {
+                if (error)
+                {
+                    error.metodo = metodo;
+                    error.sql = sql;
+                    reject(error);
+                } else
+                    resolve(results.rows);
+            });
+        });
+    }
+}
+
 module.exports = () => UsuariosDAO;

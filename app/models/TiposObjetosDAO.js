@@ -1,70 +1,149 @@
-TiposObjetosDAO = function (connection)
+/**
+ * Classe DAO referente ao controller "tiposObjetos".
+ * 
+ * @class TiposObjetosDAO
+ */
+class TiposObjetosDAO
 {
-    this._pool = connection;
-    this._tabela = 'tipos_objeto';
-
-    /*   FUNÇÃO PARA RECUPERAR UM INTERVALO DE TIPOS DE OBJETOS NO BANCO               */
-    /*                 ['DESCRIAO', 'LIMIT', 'OFFSET']                                 */
-    this.buscaIntervalo = (adcionais, callback) =>
+    /**
+     * Cria uma instância de TiposObjetosDAO.
+     * 
+     * @param {ConnectionConfig} connection 
+     * @memberof TiposObjetosDAO
+     */
+    constructor(connection)
     {
-        const text = `SELECT
-                        *
-                    FROM
-                        ${this._tabela}
-                    WHERE
-                        descricao ILIKE \'${adcionais.txconsulta}\'
-                    ORDER BY
-                        descricao ASC
-                    LIMIT
-                        ${adcionais.limit}
-                    OFFSET
-                        ${adcionais.offset};
-                    SELECT
-                        COUNT(id)
-                    FROM
-                        ${this._tabela}
-                    WHERE
-                        descricao ILIKE \'${adcionais.txconsulta}\';`;
-//        console.log(text);
-        this._pool.query(text, callback);
-    };
+        this._pool = connection;
+    }
 
-    /*       FUNÇÃO PARA RECUPERAR TODOS OS TIPOS DE OBJETOS DO BANCO                 */
-    this.buscarTodos = (callback) =>
+    /**
+     * Recupera um intervalo definido de tipos de objeto do banco.
+     * Busca por: tipos_objeto.descricao.
+     * 
+     * @param {Object} dados 
+     * @param {String} dados.txConsulta
+     * @param {Number} dados.offset
+     * @param {Number} dados.limit
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof TiposObjetosDAO
+     */
+    buscaIntervalo(dados)
     {
-        let text = `SELECT * FROM ${this._tabela};`;
-        this._pool.query(text, callback);
-    };
+        const text = `SELECT `+
+                        `* `+
+                    `FROM `+
+                        `tipos_objeto `+
+                    `WHERE `+
+                        `descricao ILIKE '${dados.txConsulta}' `+
+                    `ORDER BY `+
+                        `descricao ASC `+
+                    `LIMIT `+
+                        `${dados.limit} `+
+                    `OFFSET `+
+                        `${dados.offset}; `+
+                    `SELECT `+
+                        `COUNT(id) `+
+                    `FROM `+
+                        `tipos_objeto `+
+                    `WHERE `+
+                        `descricao ILIKE '${dados.txConsulta}';`;
+        // console.log(text);
+
+        return this._query(text, 'application.app.model.buscaIntervalo');
+    }
     
-    /*   FUNÇÃO PARA RECUPERAR UM TIPOS DE OBJETO NO BANCO               */
-    /*                 ['DESCRIAO']                                      */
-    this.busca = (dados, callback) =>
-    {        
-        let text = `SELECT * FROM ${this._tabela} WHERE descricao ILIKE \'${dados}\';`;
-        this._pool.query(text, callback);
-    };
-
-    /*       FUNÇÃO PARA INSERIR UM NOVO TIPOS DE OBJETO NO BANCO               */
-    /*    A FUNÇÃO ESPERA UM ARRAY DE UM ÚNICO VALOR DO TIPO CARACTER           */
-    /*                 DE NO MÁXIMO 30 CARACTERES                              */
-    /*                     ['DESCRIAO']                                         */
-    this.inserir = (values, callback) =>
+    /**
+     * Verifica se existe um tipo de objeto no banco.
+     * Busca por: tipos_objeto.descricao.
+     * 
+     * @param {Object} dados
+     * @param {String} dados.descricao
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof TiposObjetosDAO
+     */
+    verificarSeExiste(dados)
     {
-        let text = `INSERT INTO ${this._tabela} (descricao, ativo) VALUES ($1, $2)`;
+        const text = `SELECT (SELECT COUNT(0) FROM tipos_objeto WHERE descricao ILIKE '${dados.descricao}' LIMIT 1) > 0 AS existe;`;
+        // console.log(text);
 
-        this._pool.query(text, values, callback);
-    };
+        return this._query(text, 'application.app.model.verificarSeExiste');
+    }
 
-    /*     FUNÇÃO PARA ATUALIZAR UM TIPOS DE OBJETO NO BANCO                    */
-    /*   A FUNÇÃO ESPERA UM ARRAY COM DOIS VALORES, UM DO TIPO                  */
-    /*        CARACTER DE NO MÁXIMO 30 CARACTERES E UM                         */
-    /*          INTEIRO NA SEGUNDA POSSIÇÃO DO ARRAY                            */
-    /*                 ['DESCRIAO', 'ID']                                       */
-    this.atualizar = (values, callback) =>
+    /**
+     * Verifica se existe um tipo de objeto no banco.
+     * Busca por: tipos_objeto.descricao.
+     * 
+     * @param {Object} dados
+     * @param {Number} dados.id
+     * @param {String} dados.descricao
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof TiposObjetosDAO
+     */
+    verificaConflitoDeNome(dados)
     {
-        let text = `UPDATE ${this._tabela} SET descricao = $2, ativo = $3 WHERE ID = $1 `;
-        this._pool.query(text, values, callback);
-    };
-};
+        const text = `SELECT (SELECT COUNT(0) FROM tipos_objeto WHERE descricao ILIKE '${dados.descricao}' AND id <> ${dados.id} LIMIT 1) > 0 AS existe;`;
+        // console.log(text);
+
+        return this._query(text, 'application.app.model.verificaConflitoDeNome');
+    }
+    
+    /**
+     * Insere um novo tipo de objeto no banco.
+     * 
+     * @param {Object} dados 
+     * @param {String} dados.descricao
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof TiposObjetosDAO
+     */
+    inserir(dados)
+    {
+        const text = `INSERT INTO tipos_objeto (descricao) VALUES ('${dados.descricao}')`;
+        // console.log(text);
+
+        return this._query(text, 'application.app.model.inserir');
+    }
+
+    /**
+     * Atualiza um tipo de objeto no banco.
+     * 
+     * @param {Object} dados 
+     * @param {String} dados.descricao 
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof TiposObjetosDAO
+     */
+    atualizar(dados)
+    {
+        const text = `UPDATE tipos_objeto SET descricao = '${dados.descricao}' WHERE id = ${dados.id};`;
+        // console.log(text);
+
+        return this._query(text, 'application.app.models.TiposObjetosDAO.atualizar');
+    }
+
+    /**
+     * Metodo interno para execução da query.
+     * 
+     * @param {Object} dados 
+     * @param {String} dados.sql 
+     * @param {String} dados.metodo
+     * @returns {Promise(resolve, results)} Promise
+     * @memberof TiposObjetosDAO
+     */
+    _query(sql, metodo)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            this._pool.query(sql, (error, results) =>
+            {
+                if (error)
+                {
+                    error.metodo = metodo;
+                    error.sql = sql;
+                    reject(error);
+                } else
+                    resolve(results.rows);
+            });
+        });
+    }
+}
 
 module.exports = () => TiposObjetosDAO;

@@ -1,14 +1,54 @@
-/*
- * Função para conversão de data para timesTamp
- * @param {dia: integer, mes: integer, ano: integer} data
- * @returns {integer}
+/**
+ * Trata a requisição quando não o requisitante não forneceu os dados necessários para atender a requisição
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
  */
-module.exports.dataParaTimesTamp = (data) =>
+module.exports.tratativaRequisicaoFaltandoDados = (application, request, response) =>
 {
-    if (data === undefined || data.ano === undefined || data.mes === undefined || data.dia === undefined)
+    response.send({ status: "warning", title: "Erro, requisição enviou dados incompletos!", msg: "Não foi possivel responder a requisição." });
+};
+
+/**
+ * Verifica se o usuário está autenticado, se é administrador e trata caso não seja a.
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ * @param {Next} next
+ */
+module.exports.verificaETrataNaoAdministrativo = (application, request, response, next) =>
+{
+    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
     {
-        const hoje = new Date();
-        return new Date(hoje.getFullYear() + '.' + (hoje.getMonth() + 1) + '.' + hoje.getDate()).getTime() / 1000;
-    } else
-        return new Date(data.ano + '.' + data.mes + '.' + data.dia).getTime() / 1000;
+        application.app.controllers.autenticacao.tratativaRequisicoesNaoAutenticadas(application, request, response);
+        return;
+    }
+    
+    if(!application.app.controllers.autenticacao.verificarSeAdministrador(application, request, response))
+    {
+        application.app.controllers.autenticacao.tratativaRequisicoesDeNaoAdministrador(application, request, response);
+        return;
+    }
+    
+    next();
+};
+
+/**
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ * @param {Middleware} ...middlewares 
+ */
+module.exports.execucaoMiddlewares = (application, request, response, ...middlewares) =>
+{
+    const execucaoPassos = indice =>
+    {
+        if(middlewares && indice < middlewares.length)
+            middlewares[indice](application, request, response, () => execucaoPassos(indice + 1));
+    };
+
+    execucaoPassos(0);
 };

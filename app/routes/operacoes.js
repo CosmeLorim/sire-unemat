@@ -1,22 +1,27 @@
+/**
+ * Exporta o módulo de rotas de Operações
+ * 
+ * @param {Application} application 
+ */
 module.exports = (application) =>
 {
     /**
-     * Recebe requisições na rota "/operacoes" via método "get" e transfere a requisição para a
-     * função "recuperarOperacoes" que tem o propósito recuperar dados referentes a operação
+     * Recebe requisições na rota "/api/operacoes" via método "get" e transfere a requisição para a
+     * função "buscar" que tem o propósito buscar dados referentes a operação
      * no controller "operacoes"
      */
-    application.get('/operacoes', (request, response) =>
+    application.get("/api/operacoes", (request, response) =>
     {
-        application.app.controllers.operacoes.recuperarOperacoes(application, request, response);
+        application.app.controllers.operacoes.buscar(application, request, response);
     });
 
     /**
-     * Recebe requisições na rota "/desativar-operacao" via método "post" e transfere a requisição para a
-     * função "desativarOperacao" que tem o propósito de desativar uma operação no banco
+     * Recebe requisições na rota "/api/operacao/" via método "delete" e transfere a requisição para a
+     * função "desativar" que tem o propósito de desativar uma operação no banco
      * no controller "operacoes"
      */
-    application.post('/desativar-operacao', (request, response) =>
+    application.delete("/api/operacao/:id", (request, response) =>
     {
-        application.app.controllers.operacoes.desativarOperacao(application, request, response);
+        application.app.controllers.operacoes.desativar(application, request, response);
     });
 };

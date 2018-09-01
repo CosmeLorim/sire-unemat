@@ -1,12 +1,17 @@
+/**
+ * Exporta o módulo de rotas da raiz
+ * 
+ * @param {Application} application 
+ */
 module.exports = function(application)
 {
-    application.get('/', (request, response) =>
+    /**
+     * Recebe requisições na rota "/" via método "get" e transfere a requisição para a
+     * função "inicio" que tem o propósito de renderizar a página inicial
+     * no controller "inicio"
+     */
+    application.get("/", (request, response) =>
     {
-        application.app.controllers.inicio.index(application, request, response);
-    });
-
-    application.post('/autenticar', (request, response) =>
-    {
-        application.app.controllers.index.autenticar(application, request, response);
+        application.app.controllers.inicio.inicio(application, request, response);
     });
 };

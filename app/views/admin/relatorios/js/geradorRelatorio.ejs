@@ -1,0 +1,103 @@
+<script>
+    var Aulas = function() {
+        this.mat_aula_1 = 'Mat. 01';
+        this.mat_aula_2 = 'Mat. 02';
+        this.mat_aula_3 = 'Mat. 03';
+        this.mat_aula_4 = 'Mat. 04';
+        this.almoco = 'Almoço';
+        this.vesp_aula_1 = 'Vesp. 01';
+        this.vesp_aula_2 = 'Vesp. 02';
+        this.vesp_aula_3 = 'Vesp. 03';
+        this.vesp_aula_4 = 'Vesp. 04';
+        this.janta = 'Janta';
+        this.not_aula_1 = 'Not. 01';
+        this.not_aula_2 = 'Not. 02';
+        this.not_aula_3 = 'Not. 03';
+        this.not_aula_4 = 'Not. 04';
+    };
+
+    var diaDaSemana = function(dia) {
+        switch (dia) {
+            case 1:
+                return 'Segunda'
+                break;
+            case 2:
+                return 'Terça'
+                break;
+            case 3:
+                return 'Quarta';
+                break;
+            case 4:
+                return 'Quinta';
+                break;
+            case 5:
+                return 'Sexta';
+                break;
+            case 6:
+                return 'Sábado';
+                break;                        
+            default:
+                console.error('Valor incorreto para dia da semana.');
+                return 'Valor inválido';
+                break;
+        }
+    }
+
+    var GerarRelatorio = function(dados) {
+        /* Tamanho do bloco define quantos dias cada tabela possui */
+        var tamanhoBloco = 6;
+
+        var relatorios = dados.relatorios;
+        var horarioRelatorio = 'Relatório gerado as ' + dados.dataEHoraRelatorio.hora + ' de ' + dados.dataEHoraRelatorio.data;
+
+        /* Cada bloco é utilizado para criar uma tabela */
+        var blocosRelatorios = function() {
+            var lista = [];
+
+            for(var i = 0, max = parseInt(relatorios.length / 6) + 1; i < max; i++) {
+                lista.push(relatorios.slice(i * tamanhoBloco, i * tamanhoBloco + tamanhoBloco ));
+            }
+
+            return lista;
+        }();
+
+        /* Cada tabela é gerada sobre cada bloco */
+        tabelas = function() {
+            var tabela = { thead: ['Horário'], tbody: [new Aulas()] };
+
+            /* Itera sobre os blocos de relatórios, cada um será uma tabela */
+            for(bloco of blocosRelatorios) {
+                /* Itera sobre cada coluna do bloco */
+                for(coluna of bloco) {
+                    /* Cria o cabeçalho da coluna */
+                    cabecalho = function() {
+                        var data = new Date(parseInt(coluna.data) * 1000);
+                        var diaSemana = diaDaSemana(data.getDay());
+                        var dia = data.getDate() + '/' + (data.getMonth() + 1) + '/' + data.getFullYear();
+                        return diaSemana + ' ' + dia;
+                    }();
+                    tabela.thead.push(cabecalho);
+
+                    /* Cria o corpo da coluna da tabela */
+                    var tr = [];
+                    for(aula in new Aulas()) {
+                        tr[aula] = coluna[aula];
+                    }
+                    tabela.tbody.push(tr);
+                }
+            }
+
+            return tabela;
+        }();
+        
+        console.log(tabelas);
+
+        
+
+        var foot =  '<tfoot>' +
+                    '    <tr colspan="7">' +
+                    '        <td>Relatório Gerado ('+ horarioRelatorio +')</td>' +
+                    '    </tr>' +
+                    '</tfoot>';
+    };
+</script>

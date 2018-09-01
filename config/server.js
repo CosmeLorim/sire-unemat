@@ -1,11 +1,13 @@
-let     express = require('express'),
-        helmet = require('helmet'),
-        expressSession = require('express-session'),
-        expressValidator = require('express-validator'),
-        expressLoad = require('express-load'),
-        bodyParser = require('body-parser');
-
+require('dotenv-safe').load();
 const raizApplication = __dirname.slice(0, __dirname.length - 6);
+
+let express = require('express'),
+    helmet = require('helmet'),
+    expressSession = require('express-session'),
+    expressLoad = require('express-load'),
+    bodyParser = require('body-parser')
+    pgSession = require('connect-pg-simple')(expressSession)
+    connection = require(`${raizApplication}config/dbConnection`);
 
 let application = express();
 application.use(helmet());
@@ -16,17 +18,21 @@ application.set('views', `${raizApplication}app/views`);//configura o diretório
 application.use(bodyParser.json());
 application.use(bodyParser.urlencoded({extended: true}));
 
-application.use(expressValidator());
-
 application.use(express.static(`${raizApplication}app/public`));//configura o diretório de arquivos estaticos
 
 //configuração da sessão
 application.use(expressSession(
     {
-        secret: '24234t24tgwergGGSDFGQG23dasd',
-        resave: false,
+        store: new pgSession(
+            {
+                pool: connection(),
+                tableName: 'session'
+            }),
+        secret: process.env.EXPRESS_SECRET,
+        rolling: true,
+        resave: true,
         saveUninitialized: false,
-        cookie: {maxAge: 1000 * 60 * 60 * 5} //1000 (um segundo) * 60 (um minuto) * 60 (uma hora) * 5
+        cookie: { maxAge: parseInt(process.env.EXPRESS_COOKIE_MAXAGE) }
     }
 ));
 
@@ -36,12 +42,12 @@ let probe = require('pmx').probe();
 let counter = 0;
 
 let metric = probe.metric(
-{
-    name: 'Realtime user',
-    value: function () {
-    return counter;
-}
-});
+    {
+        name: 'Realtime user',
+        value: function () {
+            return counter;
+        }
+    });
 
 setInterval(function () {
     counter++;
@@ -49,6 +55,9 @@ setInterval(function () {
 
 expressLoad(`app/models`, {verbose: false, cwd: `${raizApplication}`})
     .then(`config/dbConnection`, {verbose: false, cwd: `${raizApplication}`})
+    .then(`config/dbConnectionV2`, {verbose: false, cwd: `${raizApplication}`})
+    .then(`config/dbConnectionProducao`, {verbose: false, cwd: `${raizApplication}`})
+    .then(`app/modules`, {verbose: false, cwd: `${raizApplication}`})
     .then(`app/controllers`, {verbose: false, cwd: `${raizApplication}`})
     .then(`app/routes`, {verbose: false, cwd: `${raizApplication}`})
     .into(application);

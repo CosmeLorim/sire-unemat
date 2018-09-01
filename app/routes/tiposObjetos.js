@@ -1,20 +1,34 @@
+/**
+ * Exporta o módulo de rotas de Tipos Objetos
+ * 
+ * @param {Application} application 
+ */
 module.exports = (application) =>
 {
-    /*                API DE CATEGORIAS                                */
-    application.get('/tiposobjetos', (request, response) =>
+    const utils = application.app.controllers.utils;
+    const tiposObjetosCtrl = application.app.controllers.tiposObjetos;
+
+    /* Responde a partícula de administração de tiposobjetos */
+    application.get("/tipos-objeto", (request, response) =>
     {
-        application.app.controllers.tiposObjetos.recuperarObjetos(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, tiposObjetosCtrl.administrar);
     });
-    application.get('/administrar-tiposobjetos', (request, response) =>
+    
+    /* Recupera dados referentes a tipos de objetos */
+    application.get("/api/tipos-objeto", (request, response) =>
     {
-        application.app.controllers.tiposObjetos.administrar(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, tiposObjetosCtrl.buscar);
     });
-    application.post('/cadastrar-tipoobjeto', (request, response) =>
+    
+    /* Cadastra um novo tipo de objeto */
+    application.post("/api/tipos-objeto", (request, response) =>
     {
-        application.app.controllers.tiposObjetos.inserir(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, tiposObjetosCtrl.inserir);
     });
-    application.post('/atualizar-tipoobjeto', (request, response) =>
+
+    /* Atualiza um tipo de objeto */
+    application.put("/api/tipos-objeto/:id", (request, response) =>
     {
-        application.app.controllers.tiposObjetos.atualizar(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, tiposObjetosCtrl.atualizar);
     });
 };

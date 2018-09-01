@@ -1,0 +1,119 @@
+<center><h2>Formulário de <span id="titulo-acao">cadastro</span> usuários</h2></center>
+<form data-role="validator" data-on-submit="return false" data-hint-mode="line">
+    <div class="panel success">
+        <div class="heading">
+            <span class="title">Login</span>
+        </div>
+        <div class="row">
+            <div class="cell colspan7" style="width: 100%">
+                <label class="block">Nome:</label>
+                <div class="input-control text"  style="width: 100%;">
+                    <input type="text"
+                            id="nome"
+                            value="" 
+                            name="nome" 
+                            placeholder="Nome" 
+                            data-validate-func="required, maxlength"
+                            data-validate-arg=", 120"
+                            data-validate-hint="O campo requerido com limite de 120 caracteres.">
+                    <span class="input-state-error mif-warning"></span>
+                    <span class="input-state-success mif-checkmark"></span>
+                </div>
+            </div>
+
+            <div class="cell colspan5">
+                <label class="block">Usuário:</label>
+                <div class="input-control text"  style="width: 90%;">
+                    <input type="text"
+                            id="usr"
+                            value="" 
+                            name="usuario" 
+                            placeholder="Usuário" 
+                            data-validate-func="required, minlength, maxlength"
+                            data-validate-arg=", 14, 14"
+                            data-validate-hint="O campo deve estar no formato de cpf.">
+                    <span class="input-state-error mif-warning"></span>
+                    <span class="input-state-success mif-checkmark"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel success">
+        <div class="heading">
+            <span class="title">Senha</span>
+        </div>
+        <div class="content">
+            <div class="row cells2" style="margin-bottom: 5px">
+                <div class="cell colspan6">
+                    <label class="block">Senha:</label>
+                    <div class="input-control password" data-role="input"  style="width: 100%;">
+                        <span id="span-passwd1"><input class="required" type="password" id="passwd1"  value=""  name="senha"  placeholder="Senha"  data-validate-func="required, minlength" data-validate-hint="Minimo 6 caracteres!"></span>
+                        <button class="button helper-button reveal"><span class="mif-looks"></span></button>
+                        <span class="input-state-error mif-warning"></span>
+                        <span class="input-state-success mif-checkmark"></span>
+                    </div>
+                </div>
+
+                <div class="cell colspan6">
+                    <label class="block">Confirmação de senha:</label>
+                    <div class="input-control password" id="div-passwd2" data-role="input"  style="width: 90%;">
+                        <span id="span-passwd2"><input class="required" type="password" id="passwd2"  value=""  placeholder="Confirmação de senha"  data-validate-func="required, minlength" data-validate-hint="Senha não confere!"></span>
+                        <button class="button helper-button reveal"><span class="mif-looks"></span></button>
+                        <span class="input-state-error mif-warning"></span>
+                        <span class="input-state-success mif-checkmark"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel success">
+        <div class="heading">
+            <span class="title">Grupo de usuário</span>
+        </div>
+        <div class="content">
+            <div class="row cells2">
+                <div class="cell">
+                    <label class="block">Normal</label>
+                    <label class="input-control radio">
+                        <input type="radio"
+                                id="normal"
+                                name="grupo" 
+                                checked=""
+                                value="normal">
+                        <span class="check"></span>
+                    </label>
+                </div>
+                <div class="cell">
+                    <label class="block">Administrador</label>
+                    <label class="input-control radio">
+                        <input type="radio"
+                                id="admin"
+                                name="grupo" 
+                                value="admin">
+                        <span class="check"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel success">
+        <div class="heading">
+            <span class="title">Categoria de objetos</span>
+        </div>
+        <div class="content">
+            <% tiposObjetos.forEach(tipoObjeto => { %>
+                <label class="input-control checkbox">
+                    <input type="checkbox" name="tipos-objetos" value="<%= tipoObjeto.id %>" id="tipo-objeto-<%= tipoObjeto.id %>">
+                    <span class="check"></span>
+                    <span class="caption"><%= tipoObjeto.descricao %></span>
+                </label>
+            <% }) %>
+        </div>
+    </div>
+    <hr>
+    <div class="align-center">
+        <button id="btn-acao" class="button primary"><span id="descricao-btn-acao">Cadastrar</span></button>
+        <a id="btn-cancelar" class="button warning">Cancelar</a>
+    </div>
+</form>

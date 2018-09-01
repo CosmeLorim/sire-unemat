@@ -1,0 +1,256 @@
+<!--forms para reserva-->
+<div class="row">
+    <div class="cell">
+        <div class="panel success">
+            <div class="heading">
+                <span class="title">Oferecimento</span>
+            </div>
+            <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                <input id="txConsultaoferecimentos" type="text">
+                <span class="label">Localizar</span>
+                <span class="informer">Digite o termo da busca</span>
+                <span class="placeholder">Digite o termo da busca</span>
+                <button id="btnConsultaOferecimento" class="button"><span class="mif-search"></span></button>
+            </div>
+            <table id="gridOferecimentos">
+
+            </table>
+        </div>
+    </div>
+    <div class="cell">
+        <div class="panel success">
+            <div class="heading">
+                <span class="title">Objeto</span>
+            </div>
+            <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                <input id="txConsultaobjetos" type="text">
+                <span class="label">Localizar</span>
+                <span class="informer">Digite o termo da busca</span>
+                <span class="placeholder">Digite o termo da busca</span>
+                <button id="btnConsultaObjeto" class="button"><span class="mif-search"></span></button>
+            </div>
+            <table id="gridObjetos">
+
+            </table>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="cell colspan7">
+        <div class="panel success">
+            <div class="heading">
+                <span class="title">Horários e datas</span>
+            </div>
+            <div class="row">
+                <div class="cell">
+                    <div class="row">
+                        <div class="cell">
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="btn-marque-aulas-mat"><span class="mif-checkmark"></span></button>
+                                <button class="button mini-button cycle-button fg-red" id="btn-desmarque-aulas-mat"><span class="mif-cross"></span></button>
+                                Matutino
+                            </p>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="mat_aula_1">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-01</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="mat_aula_2">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-02</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="mat_aula_3">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-03</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="mat_aula_4">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-04</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="cell">
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="btn-marque-aulas-vesp"><span class="mif-checkmark"></span></button>
+                                <button class="button mini-button cycle-button fg-red" id="btn-desmarque-aulas-vesp"><span class="mif-cross"></span></button>
+                                Vespertino
+                            </p>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="vesp_aula_1">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-01</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="vesp_aula_2">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-02</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="vesp_aula_3">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-03</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="vesp_aula_4">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-04</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="cell">
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="btn-marque-aulas-not"><span class="mif-checkmark"></span></button>
+                                <button class="button mini-button cycle-button fg-red" id="btn-desmarque-aulas-not"><span class="mif-cross"></span></button>
+                                Noturno
+                            </p>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="not_aula_1">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-01</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="not_aula_2">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-02</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="not_aula_3">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-03</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="not_aula_4">
+                                    <span class="check"></span>
+                                    <span class="caption">Aula-04</span>
+                                </label>
+                            </div>
+
+                        </div>
+                        <div class="cell">
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="btn-marque-aulas-esp"><span class="mif-checkmark"></span></button>
+                                <button class="button mini-button cycle-button fg-red" id="btn-desmarque-aulas-esp"><span class="mif-cross"></span></button>
+                                Especiais
+                            </p>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="almoco">
+                                    <span class="check"></span>
+                                    <span class="caption">Almoço</span>
+                                </label>
+                            </div>
+                            <div class="content">
+                                <label class="input-control checkbox">
+                                    <input type="checkbox" name="horario" value="janta">
+                                    <span class="check"></span>
+                                    <span class="caption">Janta</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell">
+                    <div
+                        data-role="calendar"
+                        id="reservadatas"
+                        data-min-date="<%= `${periodoDeReservas.inicio.ano}-${periodoDeReservas.inicio.mes}-${periodoDeReservas.inicio.dia}` %>"
+                        data-max-date="<%= `${periodoDeReservas.fim.ano}-${periodoDeReservas.fim.mes}-${periodoDeReservas.fim.dia}` %>"
+                        data-day-click="atualizaSumarioDatas()"
+                        data-buttons="true"
+                        data-multi-select="true"
+                        data-locale="pt"
+                    ></div>
+                    <p class="block">Selecionar por dias da semana do período completo:</p>
+                    <div class="row">
+                        <div class="cell">
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="diasDaSemana1" value="1">
+                                    <span class="mif-checkmark"></span>
+                                </button> Segunda
+                            </p>
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="diasDaSemana3" value="3">
+                                    <span class="mif-checkmark"></span>
+                                </button> Quarta
+                            </p>
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="diasDaSemana5" value="5">
+                                    <span class="mif-checkmark"></span>
+                                </button> Sexta
+                            </p>
+                        </div>
+                        <div class="cell">
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="diasDaSemana2" value="2">
+                                    <span class="mif-checkmark"></span>
+                                </button> Terça
+                            </p>
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="diasDaSemana4" value="4">
+                                    <span class="mif-checkmark"></span>
+                                </button> Quinta
+                            </p>
+                            <p>
+                                <button class="button mini-button cycle-button fg-blue" id="diasDaSemana6" value="6">
+                                    <span class="mif-checkmark"></span>
+                                </button> Sábado
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="cell colspan5">
+        <div class="panel success">
+            <div class="heading">
+                <span class="title">Resumo da reserva</span>
+            </div>
+            <input id="oferecimentoid" value="" hidden="">
+            <p>Oferecimento: <span id="oferecimentoselecionado"></span></p>
+            <input id="objetoid" value="" hidden="">
+            <p>Objeto: <span id="objetoselecionado"></span></p>
+            <p>Datas: <span id="diasselecionados"></span></p>
+            <label class="block">Descrição da reserva:</label>
+            <div class="input-control textarea" style="width: 100%;">
+                <textarea
+                    id="descricaooperacao"
+                    name="descricao">
+                </textarea> 
+            </div>
+            <button id="efetuarReserva" class="button primary">Efetuar Reserva</button>
+            <div id="reservasConflitantes"></div>
+        </div>
+    </div>
+</div>
+
+<% include ./js/efetuar-reserva %>
+<% include ./js/consulta-objetos %>
+<% include ./js/consulta-oferecimentos %>

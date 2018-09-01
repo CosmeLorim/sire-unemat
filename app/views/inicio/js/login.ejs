@@ -1,0 +1,125 @@
+<script>
+    $('#entrar').click(function ()
+    {
+        var usr = $('#usr').mask();
+        var passwd = $('#passwd').val();
+
+        if (!CPF.validate(usr) && usr !== '00000000000')
+        {
+            $.Notify({ caption: 'Erro no login', content: 'Você não digitou o usuário.', timeout: 5000, type: 'alert' });
+            return;
+        }
+
+        if (passwd.length === 0)
+        {
+            $.Notify({ caption: 'Erro na senha', content: 'Você não digitou a senha.', timeout: 5000, type: 'alert' });
+            return;
+        }
+
+        if (passwd.length < 6)
+        {
+            $.Notify({ caption: 'Erro na senha', content: 'Senha deve possuir ao menos 6 digitos.', timeout: 5000, type: 'alert' });
+            return;
+        }
+        
+        $.post('autenticar',
+            {
+                usr: usr,
+                passwd: md5(passwd)
+            }
+            , function (data, status) {
+                $.Notify({ caption: data.title, content: data.msg, timeout: 10000, type: data.status });
+                localStorage.setItem('usuario-da-sessao', JSON.stringify(data.usuario));
+                if(!data.usuario.primeiroLogin) {
+                    var nome = data.usuario.nome.slice(0, data.usuario.nome.indexOf(' '));
+                    
+                    var conteudo = '<p>Este é seu primeiro acesso. Por isso é necessário modificar a senha.</p>';
+                    conteudo += '<label class="block">Senha:</label>'
+                    conteudo += '<div class="input-control password" data-role="input"  style="width: 100%;">'
+                    conteudo +=     '<input type="password"'
+                    conteudo +=             'id="passwd1" '
+                    conteudo +=             'value="" '
+                    conteudo +=             'name="senha" '
+                    conteudo +=             'placeholder="Senha" '
+                    conteudo +=             'data-validate-func="required"'
+                    conteudo +=             'data-validate-hint="O campo Senha não deve ser vazio!">'
+                    conteudo +=     '<button class="button helper-button reveal"><span class="mif-looks"></span></button>'
+                    conteudo +=     '<span class="input-state-error mif-warning"></span>'
+                    conteudo +=     '<span class="input-state-success mif-checkmark"></span>'
+                    conteudo += '</div>'
+                    conteudo += '<label class="block">Confirmação de senha:</label>'
+                    conteudo += '<div class="input-control password" data-role="input"  style="width: 100%;">'
+                    conteudo +=     '<input type="password"'
+                    conteudo +=             'id="passwd2" '
+                    conteudo +=             'value="" '
+                    conteudo +=             'placeholder="Confirmação de senha" '
+                    conteudo +=             'data-validate-func="required"'
+                    conteudo +=             'data-validate-hint="O campo de confirmação de Senha não deve ser vazio!">'
+                    conteudo +=     '<button class="button helper-button reveal"><span class="mif-looks"></span></button>'
+                    conteudo +=     '<span class="input-state-error mif-warning"></span>'
+                    conteudo +=     '<span class="input-state-success mif-checkmark"></span>'
+                    conteudo += '</div>'
+
+                    metroDialog.create({
+                        title: 'Seja bem vindo '+ nome +' ao sistema de reservas!',
+                        content: conteudo,
+                        actions : [
+                            {
+                                title: 'Alterar',
+                                onclick: function(el) {
+                                    var passwd1 = $('#passwd1').val();
+                                    var passwd2 = $('#passwd2').val();
+                                    if(passwd1 !== passwd2 && passwd1.length <= 6 ) {
+                                        $.Notify({
+                                            caption: 'Senha em formato incorreto.',
+                                            content: 'A senha deve possui pelo menos 6 digitos ou você não digitou as duas senhas iguais.',
+                                            timeout: 10000,
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+
+                                    if(passwd1 === '123456'){
+                                        $.Notify({caption: 'Senha inalterada.', content: 'Senha não pode ser a mesma.', type: 'warning', timeout: 10000});
+                                        return;
+                                    }
+
+                                    
+                                    var usuario = JSON.parse(localStorage.getItem('usuario-da-sessao'));
+                                    $.ajax({
+                                        method: 'put',
+                                        url: '/api/usuario/' + usuario.usr,
+                                        data: { passwd: md5(passwd1), primeiroLogin: true },
+                                        success: function (data, status) {
+                                            if (data.status === 'success') {
+                                                if(usuario.admin)
+                                                    window.location.href = '/admin';
+                                                else
+                                                    window.location.href = '/comum';
+                                            }
+                                            $(el).data('dialog').close();
+                                        }
+                                    })
+                                }
+                            }
+                        ],
+                        options: {
+                            type: 'info',
+                            overlay: true,
+                            overlayClickClose: false,
+                            overlayColor: 'op-dark'
+                        }
+                    })
+                } else {
+                    if (data.status === 'success') {
+                        if(data.usuario.admin)
+                            window.location.href = '/admin';
+                        else
+                            window.location.href = '/comum';
+                    }
+                }            
+            });
+    });
+
+    $("#usr").mask("999.999.999-99");
+</script>

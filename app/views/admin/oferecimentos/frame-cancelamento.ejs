@@ -1,0 +1,24 @@
+<div class="grid condensed">
+    <div class="row cells12">
+        <div class="cell colspan4">
+            <center><h4>Buscar por usuário ou disciplina</h4></center>
+            <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                <input id="txConsultaOferecimento" type="text">
+                <span class="label">Localizar</span>
+                <span class="informer">Digite o termo da busca</span>
+                <span class="placeholder">Digite o termo da busca</span>
+                <button id="btnConsultaOferecimentos" class="button"><span class="mif-search"></span></button>
+            </div>
+            <p>Oferecimento selecionado: <span id="oferecimentoSelecionado" class="destaque"></span></p>
+            <button id="cancelarOferecimento" class="button warning">Cancelar oferecimento</button>
+        </div>
+        <div class="cell colspan8">
+            <table id="gridOferecimentos">
+
+            </table>
+        </div>
+    </div>
+</div>
+<input id="oferecimentoid" type="text" hidden>
+
+<% include ./js/cancelamento %>

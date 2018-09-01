@@ -1,14 +1,14 @@
-let pg = require('pg');
+const pg = require('pg');
 
-connPg = () =>
+const connPg = () =>
 {
-    var config = 
+    const config = 
     {
-        user: 'postgres',
-        database: 'reservas_v1',
-        password: '1234',
-        host: 'localhost',
-        port: 5432,
+        user: process.env.POSTGRE_USER,
+        database: process.env.POSTGRE_DATABASE,
+        password: process.env.POSTGRE_PASSWORD,
+        host: process.env.POSTGRE_HOST,
+        port: process.env.POSTGRE_PORT,
         max: 10,
         idleTimeoutMillis: 2000
     };

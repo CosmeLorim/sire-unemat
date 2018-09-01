@@ -21,26 +21,29 @@ $ git clone https://github.com/CosmeLorim/sire-unemat.git
   * Atenda aos pré-requisitos, tópico anterior.
   * Com o PostgreSQL devidamente instalado instalado e usuário root devidamente configurado recomendo a criação de um usuário exclusivamente para o sistema de reservas.
   * Crie uma base de dados limpa com um nome representativo.
-  * Pegue o arquivo "estrutura_v1.0.0.sql".
+  * Pegue o arquivo "estrutura_v1.1.0.sql".
   * Utilizando o psql e usuário root do bando de dados, ou o usuário novo, rode o seguinte comando.
 ```bash
-$ psql -U postgres nome_da_base < estrutura_1.0.0.sql
+$ psql -U postgres nome_da_base < estrutura_1.1.0.sql
 ```
   * Agora com o npm instale as depedências do projeto, dentro da pasta do projeto rode o comando.
 ```bash
 $ npm install
 ```
-  * Se tudo deu certo a aplicação já tem uma base de dados, estrutura e dependências devidamente instaladas, porém ainda não há um usuário administrador, então você terá que inserir um diretamente na base, não há senha padrão, utilize o seguinte comando SQL.
+  * Se tudo deu certo a aplicação já tem uma base de dados, estrutura e dependências devidamente instaladas, agora crie e modifique o arquivo de configuração de conexão com o banco de dados e sessão:
 ```bash
-  insert into usuarios (nome, usr, passwd, admin, ativo) values ('Root', 'root', '6bab6e5e6d45a17eb5a4b72140f91517', true, true);
-```
-  * Modifique o arquivo de configuração de conexão com o banco de dados em:
-```bash
-  /config/dbConnection.js
+  cp .env.exemple .env
 ```
   * Para iniciar a aplicação basta inserir o seguinte comando no terminal:
 ```bash
-$ node index
+$ npm start
+```
+  * Para acessar use o seguinte login e senha:
+```bash
+  Login: 00000000000
+```
+```bash
+  Senha: reservas@reservas
 ```
   * Se for colocar em produção recomendo o uso do PM2 para monitorar a saúde da aplicação e auto-reboot em caso de crash.
 

@@ -1,113 +1,138 @@
-/*              RECUPERAÇÃO DE DADOS DE CURSOS                                */
-module.exports.recuperarObjetos = (application, request, response) =>
+/**
+ * Trata erros de chamadas assíncronas.
+ * 
+ * @param {String} error
+ */
+const tratativaErrosConsultas = (error, response) =>
 {
-    let _aux = request.query.txconsulta === undefined ? '' : request.query.txconsulta;
+    console.error(error);
+    response.send({ status: "alert", title: "Erro!", msg: "Erro no servidor." });
+}
 
-    const adcionais =
+/**
+ * Responde os dados de um intervalo de cursos conforme os dados oriundos da requisição
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response
+ */
+module.exports.buscar = async (application, request, response) =>
+{
+    if(typeof(request.query.limit) === "undefined" || typeof(request.query.offset) === "undefined")
+    {
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+
+    const dadosReq =
+    {
+        txConsulta: typeof(request.query.txConsulta) === "undefined" ? "%" : `%${request.query.txConsulta}%`,        
+        limit: request.query.limit,
+        offset: request.query.offset
+    };
+
+    const CursosDAO = new application.app.models.CursosDAO(application.config.dbConnection);
+    
+    try {
+        const consulta = await CursosDAO.buscaIntervalo(
             {
-                ordem: request.query.order,
-                limit: request.query.limit,
-                offset: request.query.offset,
-                txconsulta: '%' + _aux + '%'
-            };
-
-    const connection = application.config.dbConnection;
-    let CursosDAO = new application.app.models.CursosDAO(connection);
-
-    let callback = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro: ', error);
-        } else
-        {
-            const count = results.rows[results.rows.length -1].count;
-            results.rows.pop();
+                order: dadosReq.order,
+                limit: dadosReq.limit,
+                offset: dadosReq.offset,
+                txConsulta: dadosReq.txConsulta
+            });
             
-            response.send(JSON.stringify(
-                    {
-                        total: count,
-                        rows: results.rows
-                    }
-            ));
-        }
-    };
-
-    CursosDAO.buscaIntervalo(adcionais, callback);
-};
-
-/*              ADMINISTRAÇÃO DOS CURSOS                                */
-module.exports.administrar = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRotaAdminNaoAutenticado(application, request, response);
-        return;
+        const count = consulta.pop();
+        const rows = consulta.map(curso => { return { curso } });
+        
+        response.send(JSON.stringify({ total: count, rows: rows }));
+    } catch (error) {
+        tratativaErrosConsultas(error);
     }
-
-    response.render('admin/cursos');
 };
-/*               CADASTRO DE CURSOS                                */
-module.exports.inserir = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRequisicoesNaoAutenticadas(application, request, response);
-        return;
-    }
-    
-    let dados = request.body;
-    const connection = application.config.dbConnection;
-    let CursosDAO = new application.app.models.CursosDAO(connection);
 
-    let callbackVerificacao = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro na verificação de curso: ', error);
-        } else
-        {
-            if (results.rowCount === 0)
-                CursosDAO.inserir([dados.descricao, dados.sigla, dados.ativo], callbackInsercao);
-            else
-                response.send({status: 'alert', title: 'Erro!', msg: 'Curso já existe no banco.'});
-        }
-    };
+/**
+ * Responde a particula de administração de cursos
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.administrar = (application, request, response) => { response.render("admin/cursos") };
 
-    let callbackInsercao = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro no cadastro de curso: ', error);
-        } else
-            response.send({status: 'success', title: 'Sucesso!', msg: 'Curso cadastrado com sucesso!'});
-    };
-    CursosDAO.busca(dados.descricao, callbackVerificacao);
-};
-/*              ATUALIZAÇÃO DE CURSOS                                */
-module.exports.atualizar = (application, request, response) =>
+/**
+ * Cadastra um novo curso
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.inserir = async (application, request, response) =>
 {
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
+    if(typeof(request.body.curso.descricao) === "undefined" || typeof(request.body.curso.sigla) === "undefined")
     {
-        application.app.controllers.autenticacao.tratativaRequisicoesNaoAutenticadas(application, request, response);
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
         return;
     }
     
-    const dados = request.body;
-    const connection = application.config.dbConnection;
-    const CursosDAO = new application.app.models.CursosDAO(connection);
-
-    const callback = (error, results) =>
+    const dadosReq = 
     {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro ao atualizar curso: ', error);
-        } else
-            response.send({status: 'success', title: 'Sucesso!', msg: 'Curso ' + dados.descricao + ' atualizado com sucesso!'});
+        curso: { descricao: request.body.curso.descricao, sigla: request.body.curso.sigla }
     };
-    CursosDAO.atualizar([dados.id, dados.descricao, dados.sigla, dados.ativo], callback);
+    
+    const CursosDAO = new application.app.models.CursosDAO(application.config.dbConnection);
+
+    try {
+        const conflitoDeNome = await CursosDAO.verificarConflitoDeNome({ descricao: dadosReq.curso.descricao });
+        /* Evita conflito de nomes */
+        if(conflitoDeNome[0].existe)
+        {
+            response.send({ status: "warning", title: "Erro!", msg: "Curso já existe no banco." });
+            return;
+        }
+
+        await CursosDAO.inserir({ descricao: dadosReq.curso.descricao,  sigla: dadosReq.curso.sigla });
+        response.send({ status: "success", title: "Sucesso!", msg: "Curso cadastrado com sucesso!" });
+    } catch (error) {
+        tratativaErrosConsultas(error, response);
+    }
+};
+
+/**
+ * Atualiza um curso no banco de dados
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.atualizar = async (application, request, response) =>
+{
+    if(request.params.id === undefined || typeof(request.body.curso.descricao) === "undefined" || typeof(request.body.curso.sigla) === "undefined")
+    {
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+
+    const dadosReq = 
+    {
+        curso: { id: request.params.id, descricao: request.body.curso.descricao, sigla: request.body.curso.sigla }
+    };
+    
+    const CursosDAO = new application.app.models.CursosDAO(application.config.dbConnection);
+
+    try {
+        const conflitoDeNome = await CursosDAO.verificarConflitoDeNome({ id: dadosReq.curso.id, descricao: dadosReq.curso.descricao });
+        /* Evita conflito de nomes */
+        if(conflitoDeNome[0].existe)
+        {
+            response.send({ status: "warning", title: "Erro!", msg: "Curso já existe no banco." });
+            return;
+        }
+
+        CursosDAO.atualizar({ id: dadosReq.curso.id, descricao: dadosReq.curso.descricao, sigla: dadosReq.curso.sigla });
+
+        response.send({ status: "success", title: "Sucesso!", msg: "Curso " + dadosReq.curso.descricao + " atualizado com sucesso!" });
+    } catch (error) {
+        tratativaErrosConsultas(error, response)
+    }
 };

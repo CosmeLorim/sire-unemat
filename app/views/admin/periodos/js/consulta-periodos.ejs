@@ -1,0 +1,54 @@
+<script>
+    $('#btnConsulta').on('click', function ()
+    {
+        atualizaGridPeriodos();
+    });
+
+    var periodoAntigo = new Periodo();
+    var admin = new Admin();
+
+    $("#gridPeriodos").bootstrapTable({
+        url: "/api/periodos",
+        pageSize: 10,
+        pagination: true,
+        locale: 'pt-BR',
+        queryParams: function(params){
+            return {
+                limit: params.limit,
+                offset: params.offset,
+                order: params.order,
+                txConsulta: $('#txConsulta').val()
+            };
+        },
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            {field: 'nome', title: 'Periodo', width: '50%'},
+            {field: 'data_inicio', title: 'Inicio', width: '20%', formatter: periodoAntigo.formatarData},
+            {field: 'data_fim', title: 'Fim', width: '20%', formatter: periodoAntigo.formatarData},
+            {field: 'ativo', title: 'Estado', width: '10%', formatter: periodoAntigo.formatarEstado}
+        ],
+        onClickRow: function (row)
+        {
+            $('#id').val(row.id);
+            $('#nome').val(row.nome);
+
+            $('#ativo').prop("checked", row.ativo);
+            $('#ativo').val(row.ativo);
+            $('#inativo').prop("checked", !row.ativo);
+            
+            $("#data").data('daterangepicker').setStartDate(moment.unix(row.data_inicio));
+            $("#data").data('daterangepicker').setEndDate(moment.unix(row.data_fim));
+        }
+    });
+
+    function atualizaGridPeriodos()
+    {
+        $("#gridPeriodos").bootstrapTable('refresh', {
+            url: "/api/periodos",
+            query:
+            {
+                txConsulta: $('#txConsulta').val()
+            }
+        });
+    }
+</script>

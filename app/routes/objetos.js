@@ -1,20 +1,34 @@
+/**
+ * Exporta o módulo de rotas de Objetos
+ * 
+ * @param {Application} application 
+ */
 module.exports = function (application)
 {
-    /*              API DE OBJETOS                                     */
-    application.get('/objetos', (request, response) =>
+    const utils = application.app.controllers.utils;
+    const objetosCtrl = application.app.controllers.objetos;
+    
+    /* Renderiza a partícula de administração de objetos */
+    application.get("/objetos", (request, response) =>
     {
-        application.app.controllers.objetos.recuperarObjetos(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, objetosCtrl.administrar);
     });
-    application.get('/administrar-objetos', (request, response) =>
+
+    /* Busca dados referentes a objetos */
+    application.get("/api/objetos", (request, response) =>
     {
-        application.app.controllers.objetos.administrar(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, objetosCtrl.buscar);
     });
-    application.post('/cadastrar-objeto', (request, response) =>
+
+    /* Cadastra um novo objeto */
+    application.post("/api/objetos", (request, response) =>
     {
-        application.app.controllers.objetos.inserir(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, objetosCtrl.inserir);
     });
-    application.post('/atualizar-objeto', (request, response) =>
+
+    /* Atualiza um objeto */
+    application.put("/api/objetos/:id", (request, response) =>
     {
-        application.app.controllers.objetos.atualizar(application, request, response);
+        utils.execucaoMiddlewares(application, request, response, utils.verificaETrataNaoAdministrativo, objetosCtrl.atualizar);
     });
 };

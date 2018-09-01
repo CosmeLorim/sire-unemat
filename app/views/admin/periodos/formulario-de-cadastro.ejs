@@ -1,0 +1,55 @@
+<center><h2>Inserção/atualização de períodos</h2></center>
+<div class="panel success">
+    <div class="heading">
+        <span class="title">Período</span>
+    </div>
+    <div class="cells2">
+        <div class="row">
+            <div class="cell">
+                <label class="block">Nome do período:</label>
+                <div class="input-control text">
+                    <input type="text"
+                            id="nome"
+                            value="" 
+                            name="nome" 
+                            placeholder="Ex: 2017/2" 
+                            data-validate-func="required"
+                            data-validate-hint="O campo nome não deve ser vazio!">
+                </div>
+            </div>
+            <div class="cell">
+                <label class="block">Estado:</label>
+                <label class="input-control radio">
+                    <input type="radio"
+                            id="ativo"
+                            name="ativo"
+                            value="true" 
+                            checked>
+                    <span class="check"></span>
+                    <span class="caption">Ativo</span>
+                </label>
+                <label class="input-control radio">
+                    <input type="radio"
+                            id="inativo"
+                            name="ativo"
+                            value="false">
+                    <span class="check"></span>
+                    <span class="caption">Inativo</span>
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="cell">
+                <label class="block" for="data">Inicio do período:</label>
+                <input type="text" id="data" value=""/>
+            </div>
+        </div>
+    </div>                        
+</div>
+<hr>
+<button id="inserirPeriodo" class="button primary">Inserir</button>
+<button id="atualizarPeriodo" class="button info" style="float: right;">Atualizar</button>
+
+<% include ./js/inserir-periodo.ejs %>
+<% include ./js/atualizar-periodo.ejs %>
+<% include ./js/utils.ejs %>

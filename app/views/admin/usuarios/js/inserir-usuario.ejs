@@ -1,0 +1,48 @@
+<script>
+    $('#inserirUsuario').on('click', function ()
+    {
+        var usuarioNovo = new Usuario();
+        usuarioNovo = pegarDadosFormularioUsuarios();
+        
+        if (usuarioNovo === false)
+            return;
+            
+        if (!usuarioNovo.validaSenha($("#passwd1").val(), $("#passwd2").val()))
+            return false;
+            
+        usuarioNovo.passwd = $('#passwd1').val();
+
+        var admin = new Admin();
+        var titulo = 'Cadastro de usuários';
+        var conteudo = 'Cadastrar o usuário \"' + usuarioNovo.nome + '\"?';
+        
+        var callback = function ()
+        {
+            $.post('/api/usuario',
+                {
+                    admin: usuarioNovo.admin,
+                    nome: usuarioNovo.nome,
+                    passwd: md5(usuarioNovo.passwd),
+                    usr: usuarioNovo.usr.toLowerCase(),
+                    perfil: usuarioNovo.perfil
+                },
+                function (data, status)
+                {
+                    $.Notify({
+                        caption: data.title,
+                        content: data.msg,
+                        timeout: 10000,
+                        type: data.status
+                    });
+                    if (data.status === 'success')
+                    {
+                        atualizaGridUsuarios();
+                        limpaTelaUsuarios();
+                    }
+                }
+            );
+        };
+        
+        admin.dialog(titulo, conteudo, callback);
+    });
+</script>

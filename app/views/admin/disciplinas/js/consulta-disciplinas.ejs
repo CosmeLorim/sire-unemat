@@ -1,0 +1,69 @@
+<script>
+    $('#btnConsulta').on('click', function ()
+    {
+        atualizarGridDisciplinas();
+    });
+
+    var disciplinaAntiga = new Disciplina();
+
+    $("#gridDisciplinas").bootstrapTable({
+        url: "/api/disciplinas",
+        pageSize: 10,
+        pagination: true,
+        locale: 'pt-BR',
+        queryParams: function(params){
+            return {
+                limit: params.limit,
+                offset: params.offset,
+                order: params.order,
+                txConsulta: $('#txConsulta').val()
+            };
+        },
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            {field: 'disciplinadescricao', title: 'Disciplinas', width: '45%'},
+            {field: 'cursosigla', title: 'Curso', width: '15%'},
+            {field: 'disciplinasigla', title: 'Sigla', width: '10%'},
+            {field: 'disciplinacargahoraria', title: 'Carga Horária', width: '20%'},
+            {field: 'disciplinaativo', title: 'Estado', width: '10%', formatter: disciplinaAntiga.formatarEstado}
+        ],
+        onClickRow: function (row) {
+            $('#descricao').val(row.disciplinadescricao);
+            $('#sigla').val(row.disciplinasigla);
+            $('#cargahoraria').val(row.disciplinacargahoraria);
+
+            $('#ativo').prop("checked", row.disciplinaativo);
+            $('#ativo').val(row.disciplinaativo);
+            $('#inativo').prop("checked", !row.disciplinaativo);
+
+            $('#semestre').val(row.disciplinasemestre);
+            $('#curso').val(row.cursoid);
+
+            disciplinaAntiga.id = row.disciplinaid;
+            disciplinaAntiga.descricao = row.disciplinadescricao;
+            disciplinaAntiga.sigla = row.disciplinasigla;
+            disciplinaAntiga.curso = row.disciplinacurso;
+            disciplinaAntiga.ativo = row.disciplinaativo;
+            disciplinaAntiga.carga_horaria = row.disciplinacargahoraria;
+            disciplinaAntiga.semestre = row.disciplinasemestre;
+        }
+    });
+
+    function atualizarGridDisciplinas()
+    {
+        $("#gridDisciplinas").bootstrapTable('refresh', {
+            url: "/api/disciplinas",
+            query: 
+            {
+                txConsulta: $('#txConsulta').val()
+            }
+        });
+    }
+
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+        .toggleClass("selected")
+        .siblings(".selected")
+        .removeClass("selected");
+    });
+</script>

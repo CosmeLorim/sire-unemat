@@ -1,41 +1,44 @@
 {
-  "name": "reservas",
-  "version": "1.0.0",
+  "name": "sire-unemat",
+  "version": "1.1.0",
   "description": "Sistema de Reservas de equipamentos, salas e laboratórios da UNEMAT",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/CosmeLorim/Sistema-de-Reservas-UNEMAT"
+    "url": "git+https://github.com/CosmeLorim/sire-unemat.git"
   },
   "keywords": [
     "reservas",
-    "equipamentos",
+    "equipamento",
     "salas",
-    "laboratorios",
+    "laboratórios",
+    "nodejs",
     "postgresql",
-    "nodejs"
+    "sql",
+    "express",
+    "jquery"
   ],
   "author": "Cosme da Silva Lorim",
-  "license": "Apache 2",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/CosmeLorim/Sistema-de-Reservas-UNEMATissues"
+    "url": "https://github.com/CosmeLorim/sire-unemat/issues"
   },
-  "homepage": "https://github.com/CosmeLorim/Sistema-de-Reservas-UNEMAT#readme",
+  "homepage": "https://github.com/CosmeLorim/sire-unemat#readme",
   "dependencies": {
-    "body-parser": "^1.17.2",
+    "body-parser": "^1.18.2",
+    "connect-pg-simple": "^4.2.1",
+    "dotenv-safe": "^4.0.4",
     "ejs": "^2.5.6",
-    "express": "^4.15.3",
+    "express": "^4.16.2",
     "express-load": "^1.1.16",
     "express-session": "^1.15.5",
-    "express-validator": "^3.2.1",
     "helmet": "^3.9.0",
     "pg": "^6.4.1",
     "pmx": "^1.2.0"
   },
-  "devDependencies": {
-    "standard": "^11.0.1"
-  }
+  "devDependencies": {}
 }

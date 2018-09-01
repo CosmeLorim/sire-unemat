@@ -1,0 +1,73 @@
+<script>
+    $('#tabelareservas').bootstrapTable(
+        {
+            url: "/api/reservas",
+            pageSize: 20,
+            pagination: false,
+            locale: 'pt-BR',
+            pagelist: [10, 100, 250],
+            sidePagination: 'server',
+            onClickRow: function (row)
+            {
+                $.get('api/reservas/usuarios',
+                    {
+                        data: row.data,
+                        objeto: row.objeto
+                    },
+                    function (data)
+                    {
+                        var admin = new Admin();
+                        var titulo = 'Reservas - ' + row.descricao;
+
+                        var conteudo = '';
+                        $.each(data.reservas, function (indice, aula)
+                        {
+                            conteudo += '<p>' + aula.item + ': ' + aula.professor;
+                            conteudo += aula.professor === 'Livre' ? '</p>' : ' - ' + aula.descricao + '</p>';
+                        });
+
+                        var color = 'success';
+                        admin.dialogOk({ titulo, conteudo, color });
+
+                        if (data.status === 'alert')
+                        {
+                            $.Notify(
+                                {
+                                    caption: data.title,
+                                    content: data.msg,
+                                    timeout: 10000,
+                                    type: data.status
+                                });
+                        }
+                    }
+                );
+            }
+        });
+
+    function atualizarReservas(data)
+    {
+        var tipoObjeto = $('#tipoObjeto option:selected').val();
+
+        data = typeof(data) === 'undefined' ? String($("#reservadata").calendar('getDates')) : data;
+
+        var dia = data.slice(8, 10);
+        var mes = data.slice(5, 7);
+        var ano = data.slice(0, 4);
+        
+        $('#tabelareservas').bootstrapTable('refresh', {
+            url: '/api/reservas',
+            query:
+            {
+                dia: dia === '' ? undefined : dia,
+                mes: mes === '' ? undefined : mes,
+                ano: ano === '' ? undefined : ano,
+                tipoObjeto: tipoObjeto === '' ? undefined : tipoObjeto
+            }
+        });
+    }
+
+    function formatadorCelula(val)
+    {
+        return val ? '<span class="mif-cross fg-red"></span>' : '<span class="mif-checkmark fg-blue"></span>';
+    }
+</script>

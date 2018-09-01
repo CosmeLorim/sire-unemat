@@ -1,0 +1,103 @@
+<center><h2>Inserção/atualização de disciplinas</h2></center>
+<div class="panel success">
+    <div class="heading">
+        <span class="title">Disciplina</span>
+    </div>
+    <div class="row">
+        <div class="cell colspan6">
+            <label class="block">Nome da disciplina:</label>
+            <div class="input-control text">
+                <input type="text"
+                        id="descricao"
+                        value="" 
+                        name="descricao" 
+                        placeholder="Nome da Disciplina" 
+                        data-validate-func="required"
+                        data-validate-hint="O campo nome não deve ser vazio!">
+            </div>
+        </div>
+        <div class="cell colspan5">
+            <label class="block">Sigla da disciplina:</label>
+            <div class="input-control text">
+                <input type="text"
+                        id="sigla"
+                        value="" 
+                        name="sigla" 
+                        placeholder="Sigla">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="cell colspan6">
+            <label class="block">Carga horária:</label>
+            <div class="input-control text">
+                <input type="number"
+                        id="cargahoraria"
+                        value="" 
+                        name="sigla" 
+                        placeholder="Carga horária">
+            </div>
+        </div>
+        <div class="cell colspan5">
+            <label class="block">Estado:</label>
+            <label class="input-control radio">
+                <input type="radio"
+                        id="ativo"
+                        name="ativo"
+                        value="true" 
+                        checked>
+                <span class="check"></span>
+                <span class="caption">Ativo</span>
+            </label>
+            <label class="input-control radio">
+                <input type="radio"
+                        id="inativo"
+                        name="ativo"
+                        value="false">
+                <span class="check"></span>
+                <span class="caption">Inativo</span>
+            </label>
+        </div>
+    </div>
+    <div class="row cells1">
+        <div class="cell colspan12">
+            <div class="cell">
+                <label class="block">Semestre:</label>
+                <div class="input-control select">
+                    <select id="semestre">
+                        <option value="1">1º Semestre</option>
+                        <option value="2">2º Semestre</option>
+                        <option value="3">3º Semestre</option>
+                        <option value="4">4º Semestre</option>
+                        <option value="5">5º Semestre</option>
+                        <option value="6">6º Semestre</option>
+                        <option value="7">7º Semestre</option>
+                        <option value="8">8º Semestre</option>
+                        <option value="9">9º Semestre</option>
+                        <option value="10">10º Semestre</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel success">
+    <div class="heading">
+        <span class="title">Curso</span>
+    </div>
+        <label class="block">Curso da disciplina:</label>
+        <div class="input-control select">
+            <select id="curso">
+                <% for(var i = 0; i < cursos.length; i ++){ %>
+                <option value="<%= cursos[i].id %>"><%= cursos[i].descricao %></option>
+                <% } %>
+            </select>
+        </div>
+</div>
+<hr>
+<button id="inserirDisciplina" class="button primary">Inserir</button>
+<button id="atualizarDisciplina" class="button info" style="float: right;">Atualizar</button>
+
+<% include ./js/inserir-disciplina.ejs %>
+<% include ./js/atualizar-disciplina.ejs %>
+<% include ./js/utils.ejs %>

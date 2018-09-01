@@ -1,10 +1,5 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-var Admin = function () {
+var Admin = function ()
+{
     this.dialog = function (titulo, conteudo, callback) {
         metroDialog.create({
             title: titulo,
@@ -65,7 +60,7 @@ var Curso = function ()
 {
     this.id = null; //integer
     this.descricao = ''; //char[120]
-    this.ativo = null; //boolean
+    this.sigla = '';
 
     this.validaDescricao = function (descricao)
     {
@@ -152,6 +147,7 @@ var Disciplina = function ()
         }
         return true;
     };
+
     this.validaSigla = function (sigla)
     {
         if (sigla.length === 0)
@@ -176,6 +172,7 @@ var Disciplina = function ()
         }
         return true;
     };
+    
     this.validaCargaHoraria = function (descricao)
     {
         if (descricao.length === 0)
@@ -189,6 +186,11 @@ var Disciplina = function ()
             return false;
         }
         return true;
+    };
+
+    this.formatarEstado = function(ativo)
+    {
+        return ativo ? "Ativo" : "Inativo";
     };
 };
 
@@ -223,6 +225,11 @@ var Objeto = function ()
         }
         return true;
     };
+
+    this.formatarEstado = function(ativo)
+    {
+        return ativo ? "Ativo" : "Inativo";
+    };
 };
 
 var Oferecimento = function ()
@@ -256,14 +263,16 @@ var Operacao = function ()
     this.ativo = null; //boolean
 };
 
-var Perfil = function () {
+var Perfil = function ()
+{
     this.id = null; //integer
     this.usuario = null; //integer
     this.tipo_objeto = null; //integer
     this.ativo = null; //boolean
 };
 
-var Periodo = function () {
+var Periodo = function ()
+{
     this.id = null; // integer
     this.data_inicio = null; //bigint
     this.data_fim = null; //bigint
@@ -271,14 +280,7 @@ var Periodo = function () {
 
     this.formatarData = function (ms)
     {
-        var dataFinal = '';
-        var data = new Date(parseInt(ms) * 1000);
-
-        dataFinal += data.getDay() + '\/';
-        dataFinal += data.getMonth() + '\/';
-        dataFinal += data.getFullYear();
-
-        return dataFinal;
+        return new Date(parseInt(ms) * 1000).toLocaleDateString();
     };
 
     this.copiarDados = function (objeto)
@@ -291,7 +293,6 @@ var Periodo = function () {
 
     this.validaNome = function (nome)
     {
-
         if (nome.length !== 6)
         {
             $.Notify({
@@ -316,23 +317,14 @@ var Periodo = function () {
         return true;
     };
 
-    this.validaDatas = function (inicio, fim)
+    this.formatarEstado = function(ativo)
     {
-        if ((inicio > fim) || (inicio == '') || (fim == ''))
-        {
-            $.Notify({
-                caption: 'Erro',
-                content: 'O período foi definido incorretamente!',
-                timeout: 10000,
-                type: 'alert'
-            });
-            return false;
-        }
-        return true;
+        return ativo ? "Ativo" : "Inativo";
     };
 };
 
-var Reserva = function () {
+var Reserva = function ()
+{
     this.id = null; //integer
     this.periodo = {id: null, descricao: ''}; //{integer, char[6]
     this.objeto = null; //integer
@@ -419,10 +411,10 @@ var Reserva = function () {
     };
 };
 
-var TipoObjeto = function () {
+var TipoObjeto = function ()
+{
     this.id = null; //integer
     this.descricao = ''; //char[30]
-    this.ativo = null; //boolean
 
     this.validaDescricao = function (descricao)
     {
@@ -450,13 +442,12 @@ var TipoObjeto = function () {
     };
 };
 
-var Usuario = function () {
-
+var Usuario = function ()
+{
     this.id = null; //integer
     this.nome = ''; //char[120]
     this.usr = ''; //char[60]
     this.passwd = null; //char[25]
-    this.ativo = null; //boolean
     this.admin = null; //boolean
     this.perfil = []; //TipoObjeto[]
 
@@ -487,31 +478,11 @@ var Usuario = function () {
 
     this.validaUsr = function (usr)
     {
-        if (usr.length === 0)
+        if (!CPF.validate(usr) && $('#usr').mask() !== '99999999999')
         {
             $.Notify({
                 caption: 'Erro',
-                content: 'O campo usuário não deve estar vazio!',
-                timeout: 10000,
-                type: 'alert'
-            });
-            return false;
-        }
-        if (usr.length > 60)
-        {
-            $.Notify({
-                caption: 'Erro',
-                content: 'O campo usuário não deve ultrapassar 60 caracteres!',
-                timeout: 10000,
-                type: 'alert'
-            });
-            return false;
-        }
-        if (usr.indexOf(' ') !== -1)
-        {
-            $.Notify({
-                caption: 'Erro',
-                content: 'O campo usuário não deve conter espaços em branco!',
+                content: 'Usuário inválido, este deve estar no formato de CPF!',
                 timeout: 10000,
                 type: 'alert'
             });
@@ -543,4 +514,15 @@ var Usuario = function () {
         }
         return true;
     };
+
+    this.formatarTipo = function(admin)
+    {
+        return admin ? "Administrador" : "Comum";
+    };
+
+    this.formatarUsr = function(usr)
+    {
+        return usr.substr(0, 3) + '.' + usr.substr(3, 3) + '.' + usr.substr(6, 3) + '-' + usr.substr(9, 2);
+    };
 };
+

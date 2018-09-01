@@ -1,0 +1,125 @@
+<!-- CONSULTA DE OFERECIMENTOS -->
+<script>
+    $('#btnConsultaAltOferecimentos').on('click', function () {
+        atualizaGridAltDisciplinas();
+    });
+
+    $("#gridAltOferecimentos").bootstrapTable({
+        url: "/api/oferecimentos",
+        pageSize: 5,
+        pagination: true,
+        locale: 'pt-BR',
+        queryParams: function(params) {
+            return {
+                txConsulta: $('#txConsultaAltOferecimentos').val(),
+                limit: params.limit,
+                offset: params.offset,
+                order: params.order
+            };
+        },
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+        {field: 'usuarionome', title: 'Nome', width: '45%'},
+            {field: 'usuariousr', title: 'Usuário', width: '15%'},
+            {field: 'disciplina', title: 'Disciplina', width: '30%'},
+            {field: 'sigla', title: 'Curso', width: '10%'}
+        ],
+        onClickRow: function (row) {
+            var oferecimentoSpan = $('#oferecimentoAltSelecionado');
+
+            if(oferecimentoSpan.val() === '' || oferecimentoSpan.val() !== String(row.id)) {
+                oferecimentoSpan.val(row.id);
+                oferecimentoSpan.html(row.usuarionome + '-' + row.disciplina + '-' + row.sigla);
+            } else {
+                oferecimentoSpan.val('');
+                oferecimentoSpan.html('Não selecionado'); 
+            }
+        }
+    });
+
+    function atualizaGridAltDisciplinas() {
+        $("#gridAltOferecimentos").bootstrapTable('refresh', {
+            url: "/api/oferecimentos",
+            query: {
+                txConsulta: $('#txConsultaAltOferecimentos').val()
+            }
+        });
+    }
+</script>
+
+<!-- CONSULTA DE USUÁRIOS -->
+<script>
+    $('#btnConsultaAltUsuarios').on('click', function () {
+        atualizaGridAltUsuarios();
+    });
+
+    $("#gridAltUsuarios").bootstrapTable( {
+        url: "/api/usuarios",
+        pageSize: 10,
+        pagination: true,
+        locale: 'pt-BR',
+        queryParams: function(params) {
+            return {
+                limit: params.limit,
+                offset: params.offset,
+                order: params.order,
+                txConsulta: $('#txConsultaAltUsuarios').val()
+            };
+        },
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            { field: 'nome', title: 'Nome', width: '70%' },
+            { field: 'usr', title: 'Usuário', width: '30%', formatter: usuarioAntigo.formatarUsr },
+        ],
+        onClickRow: function (row) {
+            var usuarioSpan = $('#usuarioAltSelecionado');
+
+            if(usuarioSpan.val() === '' || usuarioSpan.val() !== String(row.id)) {
+                usuarioSpan.val(row.id);
+                usuarioSpan.html(row.nome);                
+            } else {
+                usuarioSpan.val('');
+                usuarioSpan.html('Não selecionado'); 
+            }
+        }
+    });
+
+    function atualizaGridAltUsuarios() {
+        $("#gridAltUsuarios").bootstrapTable('refresh', {
+            url: "/api/usuarios",
+            query: {
+                txConsulta: $('#txConsultaAltUsuarios').val()
+            }
+        });
+    }
+</script>
+
+<!-- ALTERAÇÃO DE OFERECIMENTO -->
+<script>
+    $('#alterarOferecimento').on('click', function(){
+        var oferecimento = $('#oferecimentoAltSelecionado').val();
+        var usuario = $('#usuarioAltSelecionado').val();
+
+        if(oferecimento === ''){
+            $.Notify({ caption: 'Dados incompletos', content: 'Oferecimento não selecionado.', timeout: 10000, type: 'warning' });
+            return;
+        }
+        
+        if(usuario === ''){
+            $.Notify({ caption: 'Dados incompletos', content: 'Usuário não selecionado.', timeout: 10000, type: 'warning' });
+            return;
+        }
+        
+        $.ajax({
+            url: '/api/oferecimento/' + oferecimento,
+            type: 'PUT',
+            data: { usuario: usuario },
+            success: function (data, status) {
+                $.Notify({ caption: data.title, content: data.msg, timeout: 10000, type: data.status });
+                if (data.status === 'success') {
+                    atualizaGridAltDisciplinas();
+                }
+            }
+        })
+    });
+</script>

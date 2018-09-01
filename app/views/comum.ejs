@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <% include ./parciais/head %>
+    </head>
+    <body>
+        <div class="app-bar fixed-top" data-role="appbar">
+            <a class="app-bar-element branding" href="/">Inicio</a>
+            <a class="app-bar-element branding" href="/comum">Reservas de Equipamentos e Laboratórios</a>
+            <span class="app-bar-element branding"><span id="temposessao"></span></span>
+            <span class="app-bar-divider"></span>
+            <div class="app-bar-element place-right">
+                <span class="dropdown-toggle"><span class="mif-cog"></span> <%= usuario %></span>
+                <div class="app-bar-drop-container padding10 place-right no-margin-top block-shadow fg-dark" data-role="dropdown" data-no-close="true" style="width: 220px">
+                    <ul class="unstyled-list fg-dark">
+                        <li>
+                            <a href="/" class="fg-white3 fg-hover-yellow">Inicio</a></li>
+                        <li>
+                            <a href="/sair" id="sair" class="fg-white3 fg-hover-yellow">Deslogar</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <p style="padding: 1em"></p>
+        <div id="conteudo">
+
+        </div>
+        <footer>
+            <% include ./parciais/footer %>
+        </footer>
+    </body>
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/bootstrap-table.min.js"></script>
+    <script src="js/bootstrap-table-pt-PT.js"></script>
+    <script src="js/metro.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/md5.min.js" type="text/javascript"></script>
+    <script>
+        window.onload = function ()
+        {
+            $.ajax({
+                url: '/reservas',
+                cache: false,
+                method: 'get',
+                success: function (retorno)
+                {
+                    $('#conteudo').html(retorno);
+                }
+            });
+        }
+
+        $('#sair').on('click', function()
+        {
+            localStorage.clear();
+        })
+    </script>
+    
+    <% include ./parciais/contador-regressivo %>
+    <script>
+        contadorRegressivo({ tempoSessao: <%= tempoSessao %>, destinoFimSessao: '/sair', elemento: 'temposessao' });
+    </script>
+</html>

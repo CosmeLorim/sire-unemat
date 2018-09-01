@@ -1,0 +1,98 @@
+<div class="wizard2" id="formularioOferecimentos">
+    <!--Passo 1 - Período e Usuário-->
+    <div class="step">
+        <div class="step-content">
+            <div class="row">
+                <div class="cell colspan3">
+                    <h3>Período vigente: <%= periodo.nome %></h3>
+                    <p style="padding: 10px"></p>
+                    <input id="periodo" value="<%= periodo.id %>" hidden="">
+                </div>                
+                <div class="cell colspan8">
+                    <h3>Docentes</h3>
+                    <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                        <input id="txConsultaUsuarios" type="text">
+                        <span class="label">Localizar</span>
+                        <span class="informer">Digite o nome para buscar</span>
+                        <span class="placeholder">Digite o nome para buscar</span>
+                        <button id="btnConsultaUsuarios" class="button"><span class="mif-search"></span></button>
+                    </div>
+                    <table id="gridUsuarios">
+                    
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Passo 2 |FINAL| - Disciplina, campo opcional-->
+    <div class="step">
+        <div class="step-content">
+        <div class="grid">
+            <div class="row cells11">
+                <div class="cell colspan3">
+                    <h3>Disciplina</h3>
+                </div>
+                <div class="cell colspan4">
+                    <label class="block">Filtragem por curso:</label>
+                    <div class="input-control full-size" data-role="select" data-placeholder="Nenhum" data-allow-clear="true">
+                        <select class="full-size" id="curso">
+                            <option value="0">Todos</option>
+                            <% cursos.forEach(curso => { %>
+                                <option value="<%= curso.id %>"><%= curso.descricao %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+                <div class="cell colspan4">
+                    <div class="input-control modern text place-right" data-role="input" style="width: 100%;">
+                        <input id="txConsultaDisciplina" type="text">
+                        <span class="label">Localizar</span>
+                        <span class="informer">Digite o termo da busca</span>
+                        <span class="placeholder">Digite o termo da busca</span>
+                        <button id="btnConsultaDisciplinas" class="button"><span class="mif-search"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <input id="disciplinaid" value="" hidden="">
+
+            <table id="gridDisciplinas">
+
+            </table>
+            <input id="disciplinainsercao" hidden="" value="">
+
+            <div class="row">
+                <div class="cell">
+                    <p>
+                        Docente: <span id="usuariopreviewinsercao" class="destaque"></span>
+                    </p>
+                </div>
+                <div class="cell">
+                    <div class="row">
+                        <div class="cell">
+                            <button id="inserirOferecimento" class="button primary">Inserir</button>
+                        </div>
+                        <!--<div class="cell">
+                            <button id="cancelarformulário" class="button warning">Cancelar</button>
+                        </div>-->
+                    </div>   
+                </div>
+            </div>
+            <div class="row">
+                <div class="cell">
+                    <p>
+                        Disciplina selecionada: <span id="disciplinaSelecionada" class="destaque"></span>
+                    </p>
+                </div>
+                <div class="cell">
+                    <p>
+                        Período: <span id="periodopreviewinsercao" class="destaque"></span>
+                    </p>                                                     
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% include ./js/cadastro %>

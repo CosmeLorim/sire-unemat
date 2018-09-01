@@ -1,0 +1,81 @@
+<script>
+    var Grid = function(config) {
+        var url, columns, onClickRow, grid;
+        switch(config.preConfig) {
+            case 'cursos':
+                url = '/api/cursos/';
+                columns = [
+                    { field: 'curso.descricao', title: 'Cursos', width: '85%' },
+                    { field: 'curso.sigla', title: 'Sigla', width: '15%' }
+                ];
+                break;
+            case 'tiposObjetos':
+                
+                break;
+            case 'objetos':
+                url = '/api/objetos/';
+                columns = [
+                    { field: 'objeto.descricao', title: 'Objeto', halign: 'center', width: '45%' },
+                    { field: 'tipoObjeto.descricao', title: 'Categoria', width: '45%' },
+                    { field: 'objeto.ativo', title: 'Estado', width: '30%', formatter: function(ativo) { return ativo ? "Ativo" : "Inativo" } }
+                ]
+                break;
+            case 'usuarios':
+                url = '/api/usuarios/';
+                columns = [
+                    { field: 'nome', title: 'Nome', width: '55%' },
+                    { field: 'usr', title: 'Usuário', width: '25%', formatter: function(usr){ return usr.substr(0, 3) + '.' + usr.substr(3, 3) + '.' + usr.substr(6, 3) + '-' + usr.substr(9, 2) } },
+                    { field: 'admin', title: 'Tipo', width: '20%', formatter: function(admin){ return admin ? "Administrador" : "Comum" } }
+                ]
+                break;
+            case 'disciplinas':
+                url = '/api/disciplinas'
+                columns = [
+                    { field: 'disciplina.descricao', title: 'Disciplinas', width: '45%' },
+                    { field: 'curso.sigla', title: 'Curso', width: '15%' },
+                    { field: 'disciplina.sigla', title: 'Sigla', width: '10%' },
+                    { field: 'disciplina.cargaHoraria', title: 'Carga Horária', width: '20%' },
+                    { field: 'disciplina.ativo', title: 'Estado', width: '10%', formatter: function(ativo) { return ativo ? "Ativo" : "Inativo" }}
+                ]
+                break;
+            case 'periodos':
+                
+                break;
+            case 'reservas':
+                
+                break;
+            case 'relatorios':
+                
+                break;
+        
+            default:
+                url = config.url;
+                columns = config.columns;
+                break;
+        }
+
+        /* parâmetros obrigatórios */
+        var onClickRow = config.onClickRow;
+        var grid = config.grid;
+
+        /* parâmetros opcionais */
+        var queryParams = config.queryParams || function(params) {
+            return { limit: params.limit, offset: params.offset };
+        }
+        var pagination = typeof config.pagination === 'undefined' ? true : config.pagination
+        var pageSize = config.pageSize || 10;
+        var locale = config.locale || 'pt-BR';
+        var sidePagination = config.sidePagination || 'server';
+        
+        grid.bootstrapTable({
+            url: url,
+            pageSize: pageSize,
+            pagination: pagination,
+            locale: locale,
+            queryParams: queryParams,
+            sidePagination: sidePagination,
+            columns: columns,
+            onClickRow: onClickRow
+        });
+    }
+</script>

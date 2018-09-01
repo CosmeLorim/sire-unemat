@@ -1,131 +1,162 @@
-/*              RECUPERAÇÃO DE DADOS DE OBJETOS                                */
-module.exports.recuperarObjetos = (application, request, response) =>
+/**
+ * Trata erros de chamadas assíncronas.
+ * 
+ * @param {String} error
+ */
+const tratativaErrosConsultas = (error, response) =>
 {
-    const txconsulta = request.query.txconsulta === undefined ? '' : request.query.txconsulta;
+    console.error(error);
+    response.send({ status: "alert", title: "Erro!", msg: "Erro no servidor." });
+}
 
-    const adcionais =
+/**
+ * Responde os dados de um intervalo de cursos conforme os dados oriundos da requisição
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response
+ */
+module.exports.buscar = async (application, request, response) =>
+{
+    const dadosReq =
+    {
+        txConsulta: typeof(request.query.txConsulta) === "undefined" ? "%" : `%${request.query.txConsulta}%`,
+        limit: request.query.limit,
+        offset: request.query.offset,
+    };
+
+    const ObjetosDAO = new application.app.models.ObjetosDAO(application.config.dbConnection);
+
+    try {
+        const consulta = request.session.admin ? 
+        await ObjetosDAO.buscaIntervalo({ limit: dadosReq.limit,offset: dadosReq.offset,txConsulta: dadosReq.txConsulta })
+        : await ObjetosDAO.buscaIntervaloPorPerfisDoUsuario(
             {
-                limit: request.query.limit === undefined ? 10 : request.query.limit,
-                offset: request.query.offset === undefined ? 0 : request.query.offset,
-                txconsulta: '%' + txconsulta + '%'
-            };
+                usr: request.session.usr,
+                limit: dadosReq.limit,
+                offset: dadosReq.offset,
+                txConsulta: dadosReq.txConsulta
+            });
 
-    const connection = application.config.dbConnection;
-    const ObjetosDAO = new application.app.models.ObjetosDAO(connection);
-
-    let callback = (error, results) =>
-    {
-        if (error)
+        const count = consulta.pop().count;
+        const rows = consulta.map(row =>
         {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro na recuperação de objetos: ', error);
-        } else
-        {
-            const count = results.rows[results.rows.length -1].count;
-            results.rows.pop();
-            
-            response.send(JSON.stringify(
-                    {
-                        total: count,
-                        rows: results.rows
-                    }
-            ));
-        }
-    };
-
-    ObjetosDAO.buscaIntervalo(adcionais, callback);
+            return {
+                objeto: { id: row.objid, descricao: row.objdescricao, ativo: row.objativo },
+                tipoObjeto: { id: row.tipobjid, descricao: row.tipobjdescricao }
+            }
+        })
+    
+        response.send(JSON.stringify({ total: count, rows: rows }));
+    } catch (error) {
+        tratativaErrosConsultas(error);
+    }
 };
 
-/*              RECUPERAÇÃO DE OBJETOS                             */
-module.exports.administrar = (application, request, response) =>
+/**
+ * Responde a particula de administração de objetos
+ *  
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response
+ */
+module.exports.administrar = async (application, request, response) =>
 {
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
+    const ObjetosDAO = new application.app.models.ObjetosDAO(application.config.dbConnection);
+
+    try {
+        const tiposObjetos = await ObjetosDAO.buscarTodosTiposObjetos();
+
+        response.render("admin/objetos", { tiposObjetos: tiposObjetos });
+    } catch (error) {
+        tratativaErrosConsultas(error);
+    }
+};
+
+/**
+ * Cadastra um novo objeto
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response 
+ */
+module.exports.inserir = async (application, request, response) =>
+{
+    if(typeof(request.body.descricao) === "undefined" || typeof(request.body.tipoObjeto) === "undefined" || typeof(request.body.ativo) === "undefined")
     {
-        application.app.controllers.autenticacao.tratativaRotaAdminNaoAutenticado(application, request, response);
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
         return;
     }
     
-    const connection = application.config.dbConnection;
-    let TiposObjetosDAO = new application.app.models.TiposObjetosDAO(connection);
+    const dadosReq = { descricao: request.body.descricao, tipoObjeto: request.body.tipoObjeto, ativo: request.body.ativo };
+    
+    const ObjetosDAO = new application.app.models.ObjetosDAO(application.config.dbConnection);
 
-    let callback = (error, results) =>
+    try {
+        verificacaoDeUnicidade = await ObjetosDAO.verificarSeExiste({ descricao: dadosReq.descricao });
+
+        if (verificacaoDeUnicidade[0].existe)
+        {
+            response.send({ status: "warning", title: "Erro!", msg: "Objeto já existe no banco." });
+            return;
+        }
+        
+        await ObjetosDAO.inserir({ descricao: dadosReq.descricao, tipoObjeto: dadosReq.tipoObjeto, ativo: dadosReq.ativo });
+        
+        response.send({ status: "success", title: "Sucesso!", msg: "Objeto cadastrado com sucesso!" });
+    } catch (error) {
+        tratativaErrosConsultas(error);
+    }
+};
+
+/**
+ * Atualiza um determinado objeto
+ * 
+ * @param {Application} application 
+ * @param {Request} request 
+ * @param {Response} response
+ */
+module.exports.atualizar = async (application, request, response) =>
+{
+    if(typeof(request.params.id)  === "undefined" || typeof(request.body.descricao) === "undefined" || typeof(request.body.tipoObjeto) === "undefined" ||
+       typeof(request.body.ativo) === "undefined")
     {
-        if (error)
-            response.send(error);
+        application.app.controllers.utils.tratativaRequisicaoFaltandoDados(application, request, response);
+        return;
+    }
+    
+    const dadosPost = 
+    {
+        id: request.params.id,
+        descricao: request.body.descricao,
+        tipoObjeto: request.body.tipoObjeto,
+        ativo: JSON.parse(request.body.ativo)
+    };
+    
+    const ObjetosDAO = new application.app.models.ObjetosDAO(application.config.dbConnection);
+
+    try {
+        const conflitoDeNome = await ObjetosDAO.verificaConflitoDeNome({ id: dadosPost.id, descricao: dadosPost.descricao });
+        /* Evita atualização que cause conflito de nomes */
+        if(conflitoDeNome[0].existe)
+        {
+            response.send({ status: "warning", title: "Erro!", msg: "Esta descrição já existe em outro objeto." });
+            return;
+        }
+
+        const estadoObjeto = await ObjetosDAO.buscarEstado({ id: dadosPost.id });
+        /* Desativa e atualiza ou somente atualiza */
+        if(estadoObjeto[0].ativo && !dadosPost.ativo)
+            await Promise.all(
+                [
+                    ObjetosDAO.desativacao({ objeto: dadosPost.id }),
+                    ObjetosDAO.atualizar({ id: dadosPost.id, descricao: dadosPost.descricao, ativo: dadosPost.ativo, tipoObjeto: dadosPost.tipoObjeto })
+                ]);
         else
-        {
-            let dados =
-                    {
-                        tiposObjetos: results.rows
-                    };
-            response.render('admin/objetos', {dados: dados});
-        }
+            await ObjetosDAO.atualizar({ id: dadosPost.id, descricao: dadosPost.descricao, ativo: dadosPost.ativo, tipoObjeto: dadosPost.tipoObjeto });
+
+        response.send({ status: "success", title: "Sucesso!", msg: `Objeto ${dadosPost.descricao} atualizado com sucesso!` });
+    } catch (error) {
+        tratativaErrosConsultas(error, response);
     }
-    ;
-
-    TiposObjetosDAO.buscarTodos(callback);
-};
-/*              CADASTRO DE OBJETOS                                */
-module.exports.inserir = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRequisicoesNaoAutenticadas(application, request, response);
-        return;
-    }
-    
-    let dados = request.body;
-    const connection = application.config.dbConnection;
-    let ObjetosDAO = new application.app.models.ObjetosDAO(connection);
-
-    let callbackVerificacao = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro na verificação do objeto: ', error);
-        } else
-        {
-            if (results.rowCount === 0)
-                ObjetosDAO.inserir([dados.descricao, dados.ativo, dados.tipo_objeto], callbackInsercao);
-            else
-                response.send({status: 'alert', title: 'Erro!', msg: 'Objeto já existe no banco.'});
-        }
-    };
-
-    let callbackInsercao = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro no cadastro de objeto: ', error);
-        } else
-            response.send({status: 'success', title: 'Sucesso!', msg: 'Objeto cadastrado com sucesso!'});
-    };
-
-    ObjetosDAO.buscar(dados.descricao, callbackVerificacao);
-};
-/*              ATUALIZAÇÃO DE OBJETOS                            */
-module.exports.atualizar = (application, request, response) =>
-{
-    if (!application.app.controllers.autenticacao.verificarSeAutenticado(application, request, response))
-    {
-        application.app.controllers.autenticacao.tratativaRequisicoesNaoAutenticadas(application, request, response);
-        return;
-    }
-    
-    const dados = request.body;
-    const connection = application.config.dbConnection;
-    const ObjetosDAO = new application.app.models.ObjetosDAO(connection);
-
-    const callback = (error, results) =>
-    {
-        if (error)
-        {
-            response.send({status: 'alert', title: 'Erro!', msg: 'Erro no servidor.'});
-            console.log('Erro ao atualizar objeto: ', error);
-        } else
-            response.send({status: 'success', title: 'Sucesso!', msg: 'Objeto ' + dados.descricao + ' atualizado com sucesso!'});
-    };
-    ObjetosDAO.atualizar([dados.id, dados.descricao, dados.ativo, dados.tipo_objeto], callback);
 };

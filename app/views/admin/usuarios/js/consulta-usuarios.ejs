@@ -1,0 +1,72 @@
+<script>
+    $('#btnConsulta').on('click', function ()
+    {
+        atualizaGridUsuarios();
+    });
+    
+    var usuarioAntigo = new Usuario();
+    var tiposObjetos = JSON.parse($('#tiposobjetos').val());
+
+    $("#gridUsuarios").bootstrapTable(
+    {
+        url: "/api/usuarios",
+        pageSize: 10,
+        pagination: true,
+        locale: 'pt-BR',
+        queryParams: function(params){
+            return {
+                limit: params.limit,
+                offset: params.offset,
+                order: params.order,
+                txConsulta: $('#txConsulta').val()
+            };
+        },
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            {field: 'nome', title: 'Nome', width: '55%'},
+            {field: 'usr', title: 'Usuário', width: '25%', formatter: usuarioAntigo.formatarUsr},
+            {field: 'admin', title: 'Tipo', width: '20%', formatter: usuarioAntigo.formatarTipo}
+        ],
+        onClickRow: function (row) {
+            usuarioAntigo = row;
+
+            $('#nome').val(row.nome);
+            $('#usr').val(row.usr).mask('999.999.999-99');
+
+            $('#normal').val(!row.admin);
+            $('#normal').prop("checked", !row.admin);
+            $('#admin').prop("checked", row.admin);
+
+            for (var i = 0; i < tiposObjetos.length; i ++)
+                $('#tipoObjeto' + tiposObjetos[i].id).prop('checked', false);
+
+            $.get('/api/usuario/' + usuarioAntigo.id,
+                function (data, status)
+                {
+                    usuarioAntigo.perfil = JSON.parse(data);
+                    for (var i = 0; i < usuarioAntigo.perfil.length; i++)
+                        if (usuarioAntigo.perfil[i].ativo)
+                            $('#tipoObjeto' + usuarioAntigo.perfil[i].tipo_objeto).prop('checked', true);
+                }
+            );
+        }
+    });
+
+    function atualizaGridUsuarios()
+    {
+        $("#gridUsuarios").bootstrapTable('refresh', {
+            url: "/api/usuarios",
+            query:
+            {
+                txConsulta: $('#txConsulta').val()
+            }
+        });
+    }
+
+    $("tbody").on("click", "tr", function (e) {
+        $(this)
+        .toggleClass("selected")
+        .siblings(".selected")
+        .removeClass("selected");
+    });
+</script>

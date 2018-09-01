@@ -1,0 +1,49 @@
+<script>
+    $('#btnConsultaOferecimento').on('click', function ()
+    {
+        $("#gridOferecimentos").bootstrapTable('refresh', {
+            url: "/api/oferecimentos",
+            query: { txConsulta: $('#txConsultaoferecimentos').val() }
+        });
+    });
+
+    var periodoAntigo = new Periodo();
+    var admin = new Admin();
+    var usuario = new Usuario();
+    
+    $("#gridOferecimentos").bootstrapTable({
+        url: "/api/oferecimentos",
+        pageSize: 10,
+        pagination: true,
+        locale: 'pt-BR',
+        queryParams: function(params){
+            return {
+                limit: params.limit,
+                offset: params.offset,
+                order: params.order,
+                txConsulta: $('#txConsultaoferecimentos').val()
+            };
+        },
+        pagelist: [10, 100, 250], sidePagination: 'server',
+        columns: [
+            {field: 'usuarionome', title: 'Nome', width: '45%'},
+            {field: 'usuariousr', title: 'Usuário', width: '15%', formatter: usuario.formatarUsr},
+            {field: 'periodonome', title: 'Período', width: '10%'},
+            {field: 'disciplina', title: 'Disciplina', width: '20%'},
+            {field: 'sigla', title: 'Curso', width: '10%'}
+        ],
+        onClickRow: function (row)
+        {
+            if(parseInt($('#oferecimentoid').val()) !== row.id)
+            {
+                $('#oferecimentoselecionado').html('<strong>' + row.usuarionome + '-' + row.periodonome + '-' + row.disciplina + '</strong>');
+                $('#oferecimentoselecionado').val(row.usuariousr + '-' + row.periodonome + '-' + row.disciplina);
+                $('#oferecimentoid').val(row.id);
+            } else {
+                $('#oferecimentoselecionado').html('');
+                $('#oferecimentoselecionado').val('');
+                $('#oferecimentoid').val('');
+            }
+        }
+    });
+</script>
